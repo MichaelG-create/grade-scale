@@ -1,0 +1,10 @@
+import { z } from "zod";
+
+// Payload pour l'ingestion d'une nouvelle copie soumise
+export const CreateSubmissionSchema = z.object({
+  studentPseudoId: z.string().min(3, "L'identifiant pseudo doit être fourni (anonyme)"),
+  questionId: z.string().uuid("Invalid Question ID"),
+  content: z.string().min(1, "Le contenu de la copie OCRisée ne peut pas être vide"),
+});
+
+export type CreateSubmissionDTO = z.infer<typeof CreateSubmissionSchema>;
