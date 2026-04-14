@@ -119,6 +119,7 @@ server.get('/evaluations/:submissionId', {
   const evaluation = await prisma.evaluation.findUnique({
     where: { submissionId },
     include: {
+      submission: true,
       criteriaEvaluations: {
         include: { criterion: true }
       }

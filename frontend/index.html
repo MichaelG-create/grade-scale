@@ -35,6 +35,13 @@
                     <textarea id="content" placeholder="Saisissez ou collez la réponse de l'élève ici..." required></textarea>
                 </div>
 
+                <div class="form-group" style="margin-top: -10px; margin-bottom: 25px;">
+                    <label>Suggestions (cliquez pour charger) :</label>
+                    <div id="example-buttons" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 5px;">
+                        <!-- Buttons will be injected by JS -->
+                    </div>
+                </div>
+
                 <button type="submit" id="submit-btn">
                     <span>Lancer l'évaluation par l'IA</span>
                 </button>
@@ -50,18 +57,27 @@
 
         <!-- Results Section -->
         <div id="results-section" class="hidden">
-            <div class="card">
-                <div class="result-header">
-                    <div>
-                        <h2 style="margin-bottom: 4px;">🎯 Résultat de l'Évaluation</h2>
-                        <span id="evaluation-status-tag" class="status-tag status-completed">Complété</span>
-                    </div>
-                    <div class="score-badge" id="total-score">-- / --</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <!-- Left: Student Copy -->
+                <div class="card">
+                    <h2>📋 Copie de l'élève</h2>
+                    <div id="student-copy-display" style="white-space: pre-wrap; padding: 15px; background: #fff; border: 1px solid var(--border); border-radius: 8px; font-family: 'Courier New', Courier, monospace; min-height: 200px;"></div>
                 </div>
 
-                <div class="feedback-section">
-                    <strong>Feedback Global :</strong>
-                    <p id="general-feedback" style="margin-top: 8px;"></p>
+                <!-- Right: AI Summary -->
+                <div class="card">
+                    <div class="result-header">
+                        <div style="flex: 1;">
+                            <h2 style="margin-bottom: 4px;">🎯 Résultat IA</h2>
+                            <span id="evaluation-status-tag" class="status-tag status-completed">Complété</span>
+                        </div>
+                        <div class="score-badge" id="total-score">-- / --</div>
+                    </div>
+
+                    <div class="feedback-section">
+                        <strong>Feedback Global :</strong>
+                        <p id="general-feedback" style="margin-top: 8px;"></p>
+                    </div>
                 </div>
             </div>
 

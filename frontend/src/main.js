@@ -10,6 +10,20 @@ const misconceptionsSection = document.getElementById('misconceptions-section');
 const misconceptionsText = document.getElementById('misconceptions-text');
 const newBtn = document.getElementById('new-btn');
 
+const exampleButtonsContainer = document.getElementById('example-buttons');
+
+const EXAMPLES = {
+    "9d4ebb96-9d66-41f3-99a8-d4a894b377c8": [ // Méca
+        { label: "✅ Parfait", content: "On sait que P = m x g. Avec m = 200 g = 0,200 kg et g = 9,81 N/kg. P = 0,200 * 9,81 = 1,96 N.", id: "bravo" },
+        { label: "❌ Erreur kg", content: "P = m x g. P = 200 * 9,81 = 1962 N.", id: "oubli-kg" },
+        { label: "❓ Formule", content: "P = g / m. P = 9.81 / 0.2 = 49.05 N.", id: "confusion" }
+    ],
+    "CHIMIE_ID": [ // Chimie (will dynamic handle)
+        { label: "✅ Correct", content: "n = m / M. n = 5,4 / 27,0 = 0,20 mol.", id: "chimie-ok" },
+        { label: "❌ Produit", content: "n = m * M. n = 5,4 * 27 = 145,8 mol.", id: "chimie-err" }
+    ]
+};
+
 // Fetch questions on load
 async function fetchQuestions() {
     try {
@@ -20,11 +34,41 @@ async function fetchQuestions() {
             questionSelect.innerHTML = questions.map(q => 
                 `<option value="${q.id}">${q.title} (${q.subject.code})</option>`
             ).join('');
+            
+            // Map the chemistry example to the real ID
+            const chemQuestion = questions.find(q => q.title.includes("matière"));
+            if (chemQuestion) {
+                EXAMPLES[chemQuestion.id] = EXAMPLES["CHIMIE_ID"];
+            }
+
+            updateExampleButtons();
         }
     } catch (err) {
         console.error("Failed to fetch questions:", err);
     }
 }
+
+function updateExampleButtons() {
+    const qId = questionSelect.value;
+    const examples = EXAMPLES[qId] || [];
+    
+    exampleButtonsContainer.innerHTML = examples.map(ex => `
+        <button type="button" class="example-pill" style="width: auto; padding: 4px 10px; font-size: 0.8rem; background: #eef2ff; color: var(--primary); border: 1px solid var(--primary); opacity: 0.8;">
+            ${ex.label}
+        </button>
+    `).join('');
+
+    // Handle clicks
+    const buttons = exampleButtonsContainer.querySelectorAll('button');
+    buttons.forEach((btn, index) => {
+        btn.onclick = () => {
+            document.getElementById('content').value = examples[index].content;
+            document.getElementById('studentPseudoId').value = `eleve-${examples[index].id}`;
+        };
+    });
+}
+
+questionSelect.onchange = updateExampleButtons;
 
 fetchQuestions();
 
@@ -81,6 +125,7 @@ function showResults(evaluation) {
     submissionSection.classList.add('hidden');
     resultsSection.classList.remove('hidden');
 
+    document.getElementById('student-copy-display').textContent = evaluation.submission.content;
     document.getElementById('total-score').textContent = `${evaluation.totalScore} pts`;
     document.getElementById('general-feedback').textContent = evaluation.generalFeedback;
 
