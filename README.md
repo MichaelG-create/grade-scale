@@ -1,59 +1,63 @@
-# 🎓 GradeScale AI : Évaluation Automatisée par IA (LPU)
-> **Projet de Recherche & Développement - EdTech**
-> *Optimisation de la correction académique via Inférence LLM ultra-rapide et Architecture Cloud-Native.*
-> 
-## 📑 1. Vision du Projet
-**GradeScale AI** est une infrastructure backend conçue pour automatiser l'évaluation de copies d'élèves. L'objectif est de supprimer le biais humain et la latence de correction en utilisant des modèles de langage (LLM) de pointe, tout en garantissant une précision chirurgicale grâce à des barèmes dynamiques injectés en contexte.
-## 🏗️ 2. Architecture Système (High-Level)
-### **A. Couche de Consommation (API)**
- * **Framework :** Fastify (Node.js)
- * **Pourquoi ?** Architecture orientée événements, performance supérieure à Express (+20% de débit), et validation native via schémas JSON.
-### **B. Couche de Persistance (Cloud-Native)**
- * **ORM :** Prisma
- * **Base de Données :** Neon.tech (PostgreSQL Serverless)
- * **Innovation :** Utilisation du **Connection Pooling** pour supporter des pics de charge massifs sans saturation de ressources. Architecture découplée pour éviter l'empreinte disque locale (Contrainte : < 8Go de stockage).
-### **C. Couche d'Intelligence (LPU Inférence)**
- * **Moteur :** Groq Cloud
- * **Modèle :** Llama 3-70B
- * **Spécificité :** Utilisation de puces **LPU (Language Processing Units)** permettant une analyse de texte en temps réel avec une latence quasi nulle.
-## 🌊 3. Le Pipeline de Traitement (Data Flow)
- 1. **Ingestion :** Réception de la copie (Plain Text/OCR) via un endpoint sécurisé.
- 2. **Hydratation :** Extraction des critères de notation spécifiques depuis **Neon via Prisma** (RAG structurel).
- 3. **Prompt Engineering :** Construction d'un prompt "Few-Shot" incluant :
-   * Le contexte académique.
-   * Le barème détaillé (critères, points, malus).
-   * La copie de l'élève.
- 4. **Inférence :** Analyse sémantique par **Llama 3** sur les serveurs de **Groq**.
- 5. **Structuration :** Conversion de la réponse IA en JSON typé.
- 6. **Persistance :** Archivage de la note finale et des feedbacks dans PostgreSQL.
- 7. **Restitution :** Envoi du bulletin de note détaillé au client.
-## 🛠️ 4. Choix Techniques & Optimisations
-| Composant | Solution | Justification Ingénieur |
-|---|---|---|
-| **Réseau** | IPv4 via Pooler | Contournement des limitations IPv6 de WSL2 et compatibilité universelle. |
-| **Sécurité** | SSL Enforced | Chiffrement de bout en bout des données élèves (RGPD compliant). |
-| **Scalabilité** | Serverless DB | Migration de Supabase vers **Neon** pour une meilleure gestion des ressources partagées. |
-| **Vitesse** | Groq API | Transition vers l'inférence matérielle pour garantir un feedback en < 1 seconde. |
-## 📊 5. Modèle de Données (Schéma Prisma)
- * **GradeScale** : Le conteneur du barème (ex: "Examen Final Physique").
- * **ScaleCriterion** : Les règles unitaires (ex: "Clarté", "Raisonnement", "Unités").
- * **Evaluation** : Le résultat final liant un élève à sa performance.
-## 🚀 Guide d'Installation (Quick Start)
+# 🐧 GradeScale (PoC) : Core Grading Engine pour l'Éducation Assistée par IA
+
+> **Technical Sandbox & Architectural Concept**
+> Ce dépôt présente une preuve de concept (PoC) se concentrant sur le moteur d'évaluation backend. Il explore l'implémentation de modèles de données et structurels permettant à l'IA d'assister les enseignants dans l'analyse granulaire des apprentissages, avec un focus sur la robustesse et la scalabilité.
+
+---
+
+## 🎯 1. Contexte Ingénierie & Métier
+
+La conception de ce PoC répond à un double objectif :
+1. **Transposition Architecturale** : Démontrer ma capacité à projeter des compétences éprouvées en ingénierie de la donnée (Python / SQL / Data Stack moderne) sur une stack Transactionnelle et Cloud-Native cible (Node.js, TypeScript, PostgreSQL).
+2. **Domain-Driven Design (DDD)** : Intégrer une expertise métier profonde (15 ans d'enseignement de la Physique-Chimie) directement dans la structure de données et la logique métier, assurant que la technologie serve des cas d'usage pédagogiques concrets.
+
+## 🏗️ 2. Décisions d'Architecture (System Design)
+
+Le système est construit sur des principes applicatifs robustes, conçus pour la maintenabilité et la sécurité :
+
+*   **Validation Gérée par le Schéma (Type Safety)** : Utilisation exclusive de **Zod** à la frontière de l'API pour parser les payload entrants et contraindre les réponses du LLM (Structured Outputs), garantissant un typage strict end-to-end.
+*   **Couche de Service Isolée (Separation of Concerns)** : La logique analytique et l'orchestration de l'IA (hydratation des barèmes, appels API) sont découplées des routeurs Fastify, facilitant les tests unitaires et l'isolation du code.
+*   **Stratégie de Connection Pooling (Neon.tech)** : Pour sécuriser la scalabilité en environnement Serverless, la configuration Prisma sépare le flux opérationnel applicatif (`DATABASE_URL` adossée à PgBouncer) des exécutions de migrations de schéma (`DIRECT_URL`).
+*   **Privacy By Design (RGPD)** : Intégration d'une couche de pseudonymisation interceptant et nettoyant les données étudiantes brutes avant leur exposition systémique à un fournisseur LLM externe.
+
+## 🔭 3. Modélisation Pédagogique (Core Domain)
+
+Le schéma relationnel modélise une évaluation formative granulée, au-delà du simple "score" :
+*   **Rubriques et Critères** : Structuration hiérarchique dynamique pour évaluer les compétences conceptuelles transverses (Ex: Démarche d'investigation, validation des unités).
+*   **Détection des *Misconceptions*** : Le moteur d'analyse sémantique est architecturé pour identifier les biais de raisonnement récurrents chez l'élève, facilitant la génération de feedbacks actionnables.
+
+## 🛠️ 4. Stack Technique de Référence
+
+*   **Runtime / Language** : Node.js & TypeScript (Strict Mode)
+*   **API Framework** : Fastify (Haute performance, architecture orientée événements)
+*   **ORM Layer** : Prisma
+*   **Database** : PostgreSQL (Host: Neon.tech Serverless)
+*   **Inference Engine** : API OpenAI Compatible (Groq LPU exploité ici pour la mitigation absolue de la latence)
+
+---
+
+## 🚀 Mise en Route (Development)
+
 ```bash
-# 1. Installer les dépendances
+# 1. Installation des dépendances
 npm install
 
-# 2. Configurer les secrets (.env)
-DATABASE_URL="postgresql://user:pass@ep-pooler.neon.tech/neondb"
-GROQ_API_KEY="gsk_..."
+# 2. Configuration Environnementale (.env)
+# Dupliquez le fichier d'exemple fourni et injectez vos secrets
+cp .env.example .env
 
-# 3. Synchroniser la base de données
-npx prisma migrate dev --name init_neon
+# 3. Amorçage et Synchronisation (Database)
+npx prisma migrate dev
+npm run seed
 
-# 4. Lancer le serveur
+# 4. Exécution du Serveur
 npm run dev
-
 ```
-## 🧠 6. Perspectives d'Évolution
- * **Multi-Modalité :** Intégration de modèles Vision pour corriger des copies manuscrites directement.
- * **Analytics :** Tableaux de bord de progression par classe via les données consolidées dans Neon.
+
+## 📈 Roadmap & Industrialisation
+
+Pour élever cette fondation vers un socle de production complet, les itérations suivantes viendraient consolider l'architecture :
+
+*   **Cloud Infrastructure (Azure)** : Bascule des charges de travail applicatives et de l'orchestration asynchrone (ex: files d'attente pour le traitement de masse) sur une infrastructure de conteneurs managée de type Azure.
+*   **Pipeline Multi-Modal (OCR)** : Intégration en amont d'un service de Vision par Ordinateur pour traiter l'ingestion brute de copies physiques, automatisant le pipeline de traitement ("Paper-to-Digital").
+*   **Monitoring & Observabilité** : Implémentation d'une télémétrie complète (Latence LLM requêtes/réponses, utilisation des tokens, détection d'anomalies de parsing) via un APM industriel.
