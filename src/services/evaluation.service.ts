@@ -1,16 +1,22 @@
-import OpenAI from 'openai';
-import { zodResponseFormat } from 'openai/helpers/zod';
+import { OpenAI } from 'openai';
 import { prisma } from '../utils/prisma';
 import { AIEvaluationResponseSchema } from '../schemas/evaluation.schema';
-import { Criterion, Prisma } from '@prisma/client';
+import { EvaluationStatus } from '@prisma/client';
+import { EVALUATION_SYSTEM_PROMPT } from '../utils/prompts';
+import { OpenAIError, NotFoundError } from '../errors/AppError';
+import { pseudonymizeContent } from '../utils/rgpd';
 
 export class EvaluationService {
-  private openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
+  private groq: OpenAI;
+
+  constructor(client?: OpenAI) {
+    this.groq = client || new OpenAI({
+      apiKey: process.env.GROQ_API_KEY,
+      baseURL: process.env.GROQ_BASE_URL,
+    });
+  }
 
   async evaluateSubmission(submissionId: string) {
-    // 1. Récupération de la Submission et ses relations
     const submission = await prisma.submission.findUnique({
       where: { id: submissionId },
       include: {
@@ -24,55 +30,73 @@ export class EvaluationService {
       }
     });
 
-    if (!submission) throw new Error("Submission non trouvée");
-    
-    const rubric = submission.question.rubrics[0];
-    if (!rubric) throw new Error("Aucun barème trouvé pour cette question");
+    if (!submission) {
+      throw new NotFoundError(`Submission ${submissionId} not found`);
+    }
 
-    // 2. Gestion de l'état (Upsert de l'Evaluation)
     const evaluation = await prisma.evaluation.upsert({
       where: { submissionId },
-      update: { status: 'PROCESSING' },
+      update: { status: EvaluationStatus.PROCESSING },
       create: { 
         submissionId, 
-        status: 'PROCESSING' 
+        status: EvaluationStatus.PROCESSING 
       }
     });
 
     try {
-      // 3. Appel OpenAI (Modèle supportant Structured Output)
-      const systemPrompt = `Tu es un expert en didactique des Sciences Physiques et Chimiques. 
-      Analyse la copie en tenant compte du barème fourni. Sois précis sur les unités et les chiffres significatifs. 
-      Identifie les obstacles cognitifs de l'élève (misconceptions).
-      
-      CONTEXTE DE LA QUESTION :
-      ${submission.question.content}
-      
-      BARÈME (Critères) :
-      ${rubric.criteria.map((c: Criterion) => `- ID: ${c.id} | Nom: ${c.name} | Max: ${c.maxScore} pts | Pas: ${c.step}`).join('\n')}`;
+      if (submission.question.rubrics.length === 0) {
+        throw new Error("No rubric found for this question");
+      }
 
-      const completion = await this.openai.beta.chat.completions.parse({
-        model: "gpt-4o-2024-08-06",
+      const criteriaList = submission.question.rubrics[0].criteria;
+      const criteriaString = criteriaList
+        .map(c => `- [${c.id}] ${c.name} (Max: ${c.maxScore}, Pas: ${c.step}): ${c.description}`)
+        .join('\n');
+
+      const completion = await this.groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: `Voici la copie de l'élève :\n\n${submission.content}` },
+          { role: "system", content: EVALUATION_SYSTEM_PROMPT },
+          { 
+            role: "user", 
+            content: `
+              BARÈME :
+              ${criteriaString}
+              
+              CONTENU COPIE :
+              ${pseudonymizeContent(submission.content)}
+            ` 
+          }
         ],
-        response_format: zodResponseFormat(AIEvaluationResponseSchema, "evaluation"),
+        response_format: { type: "json_object" }
       });
 
-      const result = completion.choices[0].message.parsed;
-      if (!result) throw new Error("Échec du parsing de la réponse AI");
+      const responseContent = completion.choices[0].message.content;
+      if (!responseContent) {
+        throw new OpenAIError("Empty response from AI");
+      }
 
-      // 4. Transaction Prisma pour garantir l'atomicité
-      return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-        // Nettoyage des anciennes évaluations de critères si nécessaire
+      const rawResult = JSON.parse(responseContent);
+      const validatedResult = AIEvaluationResponseSchema.parse(rawResult);
+
+      return await prisma.$transaction(async (tx) => {
+        const updatedEval = await tx.evaluation.update({
+          where: { id: evaluation.id },
+          data: {
+            totalScore: validatedResult.totalScore,
+            generalFeedback: validatedResult.generalFeedback,
+            misconceptions: validatedResult.misconceptions,
+            status: EvaluationStatus.COMPLETED
+          }
+        });
+
+        // Supprimer les évaluations de critères existantes si c'est un retry
         await tx.criterionEvaluation.deleteMany({
           where: { evaluationId: evaluation.id }
         });
 
-        // Insertion des notes par critères
         await tx.criterionEvaluation.createMany({
-          data: result.criteriaEvaluations.map((ce) => ({
+          data: validatedResult.criteriaEvaluations.map(ce => ({
             evaluationId: evaluation.id,
             criterionId: ce.criterionId,
             score: ce.score,
@@ -81,27 +105,22 @@ export class EvaluationService {
           }))
         });
 
-        // Finalisation de l'évaluation globale
-        return await tx.evaluation.update({
-          where: { id: evaluation.id },
-          data: {
-            status: 'COMPLETED',
-            totalScore: result.totalScore,
-            generalFeedback: result.generalFeedback,
-            misconceptions: result.misconceptions
-          }
-        });
+        return updatedEval;
       });
 
     } catch (error) {
-      console.error("[EvaluationService] Erreur lors de la correction:", error);
+      console.error(`[EvaluationService] Error evaluating ${submissionId}:`, error);
       
-      // Marquer l'évaluation comme échouée en cas d'erreur
       await prisma.evaluation.update({
         where: { id: evaluation.id },
-        data: { status: 'FAILED' }
+        data: { status: EvaluationStatus.FAILED }
       });
-      
+
+      if (error instanceof Error) {
+        if (error.name === 'ZodError') {
+          throw new OpenAIError(`AI response validation failed: ${error.message}`);
+        }
+      }
       throw error;
     }
   }
