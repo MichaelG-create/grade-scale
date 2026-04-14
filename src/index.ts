@@ -124,10 +124,20 @@ server.get('/evaluations/:submissionId', {
   return evaluation;
 });
 
+/**
+ * Route GET /questions
+ * Liste des exercices pour le frontend
+ */
+server.get('/questions', async () => {
+  return await prisma.question.findMany({
+    include: { subject: true }
+  });
+});
+
 // Lancement du serveur
 const start = async () => {
   try {
-    await server.register(cors);
+    await server.register(cors, { origin: true });
     
     const port = Number(process.env.PORT) || 3000;
     // Indispensable pour WSL : écoute sur 0.0.0.0
