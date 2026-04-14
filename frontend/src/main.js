@@ -138,16 +138,23 @@ function showResults(evaluation) {
     }
 
     // Criteria Breakdown
-    criteriaContainer.innerHTML = evaluation.criteriaEvaluations.map(ce => `
-        <div class="criterion-item">
-            <div class="criterion-name">
-                <span>${ce.criterion.name}</span>
-                <span>${ce.score} / ${ce.criterion.maxScore}</span>
+    criteriaContainer.innerHTML = evaluation.criteriaEvaluations.map(ce => {
+        const hasRemediation = ce.misconceptions && 
+                               ce.misconceptions !== "Aucune" && 
+                               ce.misconceptions !== "Pas d'erreur identifiée" &&
+                               ce.misconceptions !== "Pas d'erreur";
+
+        return `
+            <div class="criterion-item">
+                <div class="criterion-name">
+                    <span>${ce.criterion.name}</span>
+                    <span>${ce.score} / ${ce.criterion.maxScore}</span>
+                </div>
+                <div class="criterion-feedback">${ce.feedback}</div>
+                ${hasRemediation ? `<div class="criterion-feedback" style="color: #991b1b; font-weight: 500;">Remédiation : ${ce.misconceptions}</div>` : ''}
             </div>
-            <div class="criterion-feedback">${ce.feedback}</div>
-            ${ce.misconceptions ? `<div class="criterion-feedback" style="color: #991b1b; font-weight: 500;">Remédiation : ${ce.misconceptions}</div>` : ''}
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function setLoading(isLoading) {

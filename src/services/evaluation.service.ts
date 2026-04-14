@@ -78,12 +78,15 @@ export class EvaluationService {
 
       const rawResult = JSON.parse(responseContent);
       const validatedResult = AIEvaluationResponseSchema.parse(rawResult);
+      
+      // Sécurité : Recalcul du score total à partir des critères pour éviter les erreurs de cumul de l'IA
+      const calculatedTotalScore = validatedResult.criteriaEvaluations.reduce((acc, ce) => acc + ce.score, 0);
 
       return await prisma.$transaction(async (tx) => {
         const updatedEval = await tx.evaluation.update({
           where: { id: evaluation.id },
           data: {
-            totalScore: validatedResult.totalScore,
+            totalScore: calculatedTotalScore,
             generalFeedback: validatedResult.generalFeedback,
             misconceptions: validatedResult.misconceptions,
             status: EvaluationStatus.COMPLETED
