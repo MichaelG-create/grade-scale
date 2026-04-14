@@ -57,6 +57,14 @@ server.setErrorHandler((error, request, reply) => {
 // Healthcheck
 server.get('/health', async () => ({ status: 'ok' }));
 
+// Root
+server.get('/', async () => ({ 
+  name: "GradeScale API", 
+  version: "1.0.0", 
+  status: "Operational",
+  documentation: "https://github.com/MichaelG-create/grade-scale"
+}));
+
 /**
  * Route POST /submissions
  * Ingestion d'une copie et lancement du service d'évaluation en tâche de fond (Async)
