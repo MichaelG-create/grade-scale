@@ -38,12 +38,12 @@ Le schéma relationnel modélise une évaluation formative granulée, au-delà d
 
 ## 🚀 Mise en Route (Development)
 
+### 💻 Backend
 ```bash
 # 1. Installation des dépendances
 npm install
 
 # 2. Configuration Environnementale (.env)
-# Dupliquez le fichier d'exemple fourni et injectez vos secrets
 cp .env.example .env
 
 # 3. Amorçage et Synchronisation (Database)
@@ -53,6 +53,21 @@ npm run seed
 # 4. Exécution du Serveur
 npm run dev
 ```
+
+### 🎨 Frontend
+L'interface utilisateur est construite en Vanilla JS avec Vite pour une expérience ultra-rapide.
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## 🌐 Déploiement & Hébergement
+
+Ce projet est conçu pour être facilement "Cloud-Ready" :
+*   **Frontend** : Peut être hébergé sur **Vercel**, **Netlify** ou **GitHub Pages**. Il suffit de pousser le dossier `frontend` (ou le repo complet) et de configurer la `BASE_URL` de l'API.
+*   **Backend** : Idéal pour des services de PaaS comme **Render**, **Railway** ou **Fly.io** qui supportent Node.js et les connexions aux bases de données managées (comme Neon.tech utilisé ici).
+*   **Database** : Déjà hébergée sur **Neon.tech**, facilitant un déploiement global sans gestion d'infra serveur.
 
 ## 📈 Roadmap & Industrialisation
 
