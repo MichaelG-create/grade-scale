@@ -5,6 +5,15 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Start seeding...');
 
+  // Cleanup
+  await prisma.criterionEvaluation.deleteMany();
+  await prisma.evaluation.deleteMany();
+  await prisma.submission.deleteMany();
+  await prisma.criterion.deleteMany();
+  await prisma.rubric.deleteMany();
+  await prisma.question.deleteMany();
+  await prisma.subject.deleteMany();
+
   // 1. Subject
   const subject = await prisma.subject.upsert({
     where: { code: 'SPC' },
@@ -56,6 +65,41 @@ async function main() {
         step: 0.25,
         rubricId: rubric.id,
       },
+    ],
+  });
+
+  // 5. Autre Question (Chimie)
+  const question2 = await prisma.question.create({
+    data: {
+      title: "Quantité de matière",
+      content: "On dispose d'un échantillon de 5.4g d'aluminium (Al). La masse molaire de l'aluminium est M = 27.0 g/mol. Calculer la quantité de matière n d'atomes d'aluminium contenue dans cet échantillon.",
+      subjectId: subject.id,
+    },
+  });
+
+  const rubric2 = await prisma.rubric.create({
+    data: {
+      title: 'Barème Chimie',
+      questionId: question2.id,
+    },
+  });
+
+  await prisma.criterion.createMany({
+    data: [
+      {
+        name: 'Relation n = m / M',
+        description: "Citer la formule liant n, m et M.",
+        maxScore: 1.0,
+        step: 1.0,
+        rubricId: rubric2.id,
+      },
+      {
+        name: 'Calcul numérique (n = 0.20 mol)',
+        description: "Effectuer le calcul 5.4 / 27.0.",
+        maxScore: 1.0,
+        step: 0.5,
+        rubricId: rubric2.id,
+      }
     ],
   });
 
