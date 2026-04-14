@@ -25,11 +25,6 @@
             <h2>📝 Soumettre une copie</h2>
             <form id="submission-form">
                 <div class="form-group">
-                    <label for="studentPseudoId">Pseudo Élève (Pseudo-anonymisation)</label>
-                    <input type="text" id="studentPseudoId" placeholder="ex: eleve-alpha-9" required>
-                </div>
-                
-                <div class="form-group">
                     <label for="questionId">Question de l'exercice</label>
                     <select id="questionId" required>
                         <!-- Will be populated by JS -->
@@ -39,17 +34,22 @@
                         <p id="question-preview-text"></p>
                     </div>
                 </div>
-
-                <div class="form-group">
-                    <label for="content">Contenu de la copie (Texte ou OCR)</label>
-                    <textarea id="content" placeholder="Collez ici la réponse de l'élève..." required></textarea>
-                </div>
-
+                
                 <div class="form-group" style="margin-top: -10px; margin-bottom: 30px;">
                     <label>Suggestions rapides :</label>
                     <div id="example-buttons" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px;">
                         <!-- Injected by JS -->
                     </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="studentPseudoId">Pseudo Élève (Pseudo-anonymisation)</label>
+                    <input type="text" id="studentPseudoId" placeholder="ex: eleve-alpha-9" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="content">Contenu de la copie (Texte ou OCR)</label>
+                    <textarea id="content" placeholder="Collez ici la réponse de l'élève..." required></textarea>
                 </div>
 
                 <button type="submit" class="submit-btn" id="submit-btn">

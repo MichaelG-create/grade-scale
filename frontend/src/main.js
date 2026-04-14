@@ -188,7 +188,6 @@ function showResults(evaluation) {
     document.getElementById('general-feedback').textContent = evaluation.generalFeedback;
 
     // Assignment Context Display
-    const question = evaluation.submission.question;
     if (question) {
         document.getElementById('assignment-context').classList.remove('hidden');
         const subjectTag = question.subject ? `[${question.subject.name}] ` : '';
