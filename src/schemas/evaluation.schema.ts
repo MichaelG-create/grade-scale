@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const AICriterionEvaluationSchema = z.object({
-  criterionId: z.string().uuid(),
+  criterionId: z.uuid(),
   score: z.number(),
   feedback: z.string(),
   misconceptions: z.string().optional(),

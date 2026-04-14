@@ -66,7 +66,7 @@ server.post('/submissions', {
     body: CreateSubmissionSchema,
     response: {
       202: z.object({
-        submissionId: z.string().uuid(),
+        submissionId: z.uuid(),
         message: z.string(),
       }),
     },
@@ -102,7 +102,7 @@ server.post('/submissions', {
 server.get('/evaluations/:submissionId', {
   schema: {
     params: z.object({
-      submissionId: z.string().uuid(),
+      submissionId: z.uuid(),
     }),
   },
 }, async (request, reply) => {
