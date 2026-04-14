@@ -139,7 +139,10 @@ function showResults(evaluation) {
 
     // Criteria Breakdown
     criteriaContainer.innerHTML = evaluation.criteriaEvaluations.map(ce => {
-        const hasRemediation = ce.misconceptions && 
+        // Règle métier : Si tous les points sont obtenus, on masque la remédiation technique de l'IA
+        const hasAllPoints = ce.score === ce.criterion.maxScore;
+        
+        const hasRemediation = !hasAllPoints && ce.misconceptions && 
                                ce.misconceptions !== "Aucune" && 
                                ce.misconceptions !== "Pas d'erreur identifiée" &&
                                ce.misconceptions !== "Pas d'erreur";
