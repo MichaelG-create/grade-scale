@@ -9,8 +9,15 @@
 <body>
     <div class="container">
         <header>
-            <div class="logo">🐧 GradeScale AI</div>
-            <p class="subtitle">Proof of Concept - Assistant de Correction Pédagogique (SPC)</p>
+            <div class="brand">
+                <div class="logo">🐧 GradeScale AI</div>
+                <p class="subtitle">Proof of Concept - Assistant de Correction Pédagogique (SPC)</p>
+            </div>
+            <div class="nav-actions">
+                <button class="btn-secondary btn-disabled" title="Bientôt disponible">
+                    ✨ Créateur d'éval
+                </button>
+            </div>
         </header>
 
         <!-- Submission Form -->
@@ -18,88 +25,105 @@
             <h2>📝 Soumettre une copie</h2>
             <form id="submission-form">
                 <div class="form-group">
-                    <label for="studentPseudoId">Pseudo Élève (RGPD)</label>
-                    <input type="text" id="studentPseudoId" placeholder="ex: eleve-42" required>
+                    <label for="studentPseudoId">Pseudo Élève (Pseudo-anonymisation)</label>
+                    <input type="text" id="studentPseudoId" placeholder="ex: eleve-alpha-9" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="questionId">Question de l'exercice</label>
                     <select id="questionId" required>
                         <!-- Will be populated by JS -->
-                        <option value="9d4ebb96-9d66-41f3-99a8-d4a894b377c8">Le mouvement d'un palet (Mécanique)</option>
                     </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="content">Contenu de la copie (Texte/OCR)</label>
-                    <textarea id="content" placeholder="Saisissez ou collez la réponse de l'élève ici..." required></textarea>
-                </div>
-
-                <div class="form-group" style="margin-top: -10px; margin-bottom: 25px;">
-                    <label>Suggestions (cliquez pour charger) :</label>
-                    <div id="example-buttons" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 5px;">
-                        <!-- Buttons will be injected by JS -->
+                    <div id="question-preview" class="question-preview hidden">
+                        <small>Énoncé :</small>
+                        <p id="question-preview-text"></p>
                     </div>
                 </div>
 
-                <button type="submit" id="submit-btn">
-                    <span>Lancer l'évaluation par l'IA</span>
+                <div class="form-group">
+                    <label for="content">Contenu de la copie (Texte ou OCR)</label>
+                    <textarea id="content" placeholder="Collez ici la réponse de l'élève..." required></textarea>
+                </div>
+
+                <div class="form-group" style="margin-top: -10px; margin-bottom: 30px;">
+                    <label>Suggestions rapides :</label>
+                    <div id="example-buttons" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px;">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submit-btn">
+                    Lancer l'évaluation par l'IA
                 </button>
             </form>
         </div>
 
         <!-- Loading State -->
         <div id="loading-section" class="card hidden" style="text-align: center;">
-            <div class="loader" style="margin: 0 auto 20px; border-top-color: var(--primary);"></div>
-            <h2>Analyse en cours par l'IA...</h2>
-            <p class="text-muted">Nous identifions les compétences et les éventuelles misconceptions.</p>
+            <div class="loader"></div>
+            <h2>Analyse multidimensionnelle en cours...</h2>
+            <p style="color: var(--text-muted);">Identification des compétences, détection des misconceptions et calibration du barème.</p>
         </div>
 
         <!-- Results Section -->
         <div id="results-section" class="hidden">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-                <!-- Left: Student Copy -->
+            <div class="result-grid">
+                <!-- Left: Student Copy & Context -->
                 <div class="card">
-                    <h2>📋 Copie de l'élève</h2>
-                    <div id="student-copy-display" style="white-space: pre-wrap; padding: 15px; background: #fff; border: 1px solid var(--border); border-radius: 8px; font-family: 'Courier New', Courier, monospace; min-height: 200px;"></div>
+                    <div id="assignment-context" class="hidden">
+                        <div class="context-section">
+                            <h3>📚 Énoncé du Sujet</h3>
+                            <div id="assignment-text" style="font-style: italic; color: var(--text-muted); font-size: 0.95rem;"></div>
+                        </div>
+                        
+                        <div class="context-section" style="border-left-color: var(--secondary);">
+                            <h3>📋 Barème de Correction</h3>
+                            <div id="full-rubric" style="font-size: 0.85rem; line-height: 1.8;"></div>
+                        </div>
+                    </div>
+
+                    <h2>📝 Copie de l'élève</h2>
+                    <div id="student-copy-display" style="white-space: pre-wrap; padding: 20px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; font-family: 'Courier New', monospace; min-height: 200px;"></div>
                 </div>
 
                 <!-- Right: AI Summary -->
                 <div class="card">
-                    <div class="result-header">
-                        <div style="flex: 1;">
-                            <h2 style="margin-bottom: 4px;">🎯 Résultat IA</h2>
-                            <span id="evaluation-status-tag" class="status-tag status-completed">Complété</span>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
+                        <div>
+                            <h2>🎯 Résultat IA</h2>
+                            <div id="evaluation-status-tag" class="status-badge status-completed">Evalué par GPT-4o</div>
                         </div>
-                        <div class="score-badge" id="total-score">-- / --</div>
+                        <div class="score-display" id="total-score">-- / --</div>
                     </div>
 
-                    <div class="feedback-section">
-                        <strong>Feedback Global :</strong>
-                        <p id="general-feedback" style="margin-top: 8px;"></p>
+                    <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
+                        <strong style="color: var(--primary); display: block; margin-bottom: 10px; font-size: 0.8rem; text-transform: uppercase;">Feedback Global :</strong>
+                        <p id="general-feedback" style="line-height: 1.7;"></p>
                     </div>
                 </div>
             </div>
 
-            <div id="misconceptions-section" class="card misconceptions-card hidden">
-                <h2>⚠️ Points de vigilance (Remédiation)</h2>
-                <p id="misconceptions-text"></p>
+            <div id="misconceptions-section" class="card hidden" style="background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.2);">
+                <h2 style="color: #fb7185;">⚠️ Bilan de Remédiation</h2>
+                <p id="misconceptions-text" style="color: #fda4af; font-weight: 500;"></p>
             </div>
 
             <div class="card">
-                <h2>📊 Détail par Critères</h2>
-                <div id="criteria-container" class="criteria-list">
+                <h2>📊 Analyse Détaillée par Critère</h2>
+                <div id="criteria-container" style="display: grid; gap: 20px;">
                     <!-- Criteria evaluations will be injected here -->
                 </div>
             </div>
 
-            <button id="new-btn" style="background: white; color: var(--text); border: 1px solid var(--border); margin-bottom: 40px;">
-                Nouvelle évaluation
-            </button>
+            <div style="text-align: center;">
+                <button id="new-btn" class="btn-secondary" style="margin-bottom: 60px; padding: 15px 40px;">
+                    Nouvelle évaluation
+                </button>
+            </div>
         </div>
 
         <footer>
-            Conçu par Michael GARCIA - EdTech Senior Engineering Showcase
+            Propulsé par 🐧 <strong>GradeScale Engine</strong> • Michael GARCIA & Ed.AI
         </footer>
     </div>
 

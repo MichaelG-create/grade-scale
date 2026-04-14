@@ -26,7 +26,12 @@ const server = fastify({
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
 
-const evaluationService = new EvaluationService();
+const isVerbose = process.argv.includes('--verbose');
+const evaluationService = new EvaluationService(undefined, server.log, isVerbose);
+
+if (isVerbose) {
+  server.log.info('🛠️ Verbose mode enabled');
+}
 
 // Standardized Error Handler
 server.setErrorHandler((error, request, reply) => {
@@ -119,7 +124,18 @@ server.get('/evaluations/:submissionId', {
   const evaluation = await prisma.evaluation.findUnique({
     where: { submissionId },
     include: {
-      submission: true,
+      submission: {
+        include: {
+          question: {
+            include: {
+              subject: true,
+              rubrics: {
+                include: { criteria: true }
+              }
+            }
+          }
+        }
+      },
       criteriaEvaluations: {
         include: { criterion: true }
       }
