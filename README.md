@@ -61,3 +61,6 @@ Pour élever cette fondation vers un socle de production complet, les itération
 *   **Cloud Infrastructure (Azure)** : Bascule des charges de travail applicatives et de l'orchestration asynchrone (ex: files d'attente pour le traitement de masse) sur une infrastructure de conteneurs managée de type Azure.
 *   **Pipeline Multi-Modal (OCR)** : Intégration en amont d'un service de Vision par Ordinateur pour traiter l'ingestion brute de copies physiques, automatisant le pipeline de traitement ("Paper-to-Digital").
 *   **Monitoring & Observabilité** : Implémentation d'une télémétrie complète (Latence LLM requêtes/réponses, utilisation des tokens, détection d'anomalies de parsing) via un APM industriel.
+
+---
+*Projet conçu avec rigueur par Michael GARCIA - Ingénieur & Enseignant.*
