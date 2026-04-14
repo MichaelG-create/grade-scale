@@ -31,6 +31,7 @@ model Question {
   id          String       @id @default(uuid())
   title       String
   content     String       @db.Text
+  solution    String?      @db.Text // Référentiel de correction pour l'IA
   
   subjectId   String
   subject     Subject      @relation(fields: [subjectId], references: [id])

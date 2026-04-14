@@ -60,10 +60,13 @@ export class EvaluationService {
           { 
             role: "user", 
             content: `
+              SOLUTION RÉFÉRENCE (pour calibrer tes calculs) :
+              ${submission.question.solution || "Non fournie"}
+
               BARÈME :
               ${criteriaString}
               
-              CONTENU COPIE :
+              CONTENU COPIE ÉLÈVE :
               ${pseudonymizeContent(submission.content)}
             ` 
           }
