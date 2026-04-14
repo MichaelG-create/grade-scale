@@ -9,6 +9,8 @@ import { prisma } from './utils/prisma';
 import { EvaluationService } from './services/evaluation.service';
 import { CreateSubmissionSchema } from './schemas/submission.schema';
 import { z } from 'zod';
+import { AppError } from './errors/AppError';
+
 
 const server = fastify({
   logger: {
@@ -25,6 +27,32 @@ server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
 
 const evaluationService = new EvaluationService();
+
+// Standardized Error Handler
+server.setErrorHandler((error, request, reply) => {
+  if (error instanceof z.ZodError) {
+    return reply.status(400).send({
+      code: 'VALIDATION_ERROR',
+      message: 'Données invalides',
+      details: error.errors,
+    });
+  }
+
+  if (error instanceof AppError) {
+    return reply.status(error.statusCode).send({
+      code: error.name.toUpperCase(),
+      message: error.message,
+    });
+  }
+
+
+  request.log.error(error);
+  return reply.status(500).send({
+    code: 'INTERNAL_SERVER_ERROR',
+    message: 'Une erreur imprévue est survenue',
+  });
+});
+
 
 // Healthcheck
 server.get('/health', async () => ({ status: 'ok' }));
