@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon -e ts -w src -x ts-node src/index.ts",
+    "dev:verbose": "nodemon -e ts -w src -x ts-node src/index.ts -- --verbose",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
