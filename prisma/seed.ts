@@ -29,6 +29,7 @@ async function main() {
     data: {
       title: "Le mouvement d'un palet",
       content: "Un palet de masse m=200g glisse sans frottement sur une surface horizontale. On donne g=9.81 N/kg. Calculer la valeur du poids P du palet en précisant l'unité.",
+      solution: "m = 200g = 0.200kg. P = m * g = 0.200 * 9.81 = 1.962 N.",
       subjectId: subject.id,
     },
   });
@@ -73,6 +74,7 @@ async function main() {
     data: {
       title: "Quantité de matière",
       content: "On dispose d'un échantillon de 5.4g d'aluminium (Al). La masse molaire de l'aluminium est M = 27.0 g/mol. Calculer la quantité de matière n d'atomes d'aluminium contenue dans cet échantillon.",
+      solution: "m = 5.4g. M = 27.0 g/mol. n = m / M = 5.4 / 27.0 = 0.20 mol.",
       subjectId: subject.id,
     },
   });
