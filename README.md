@@ -65,7 +65,7 @@ npm run dev
 ## 🌐 Déploiement & Hébergement
 
 Ce projet est conçu pour être facilement "Cloud-Ready" :
-*   **Frontend** : Peut être hébergé sur **Vercel**, **Netlify** ou **GitHub Pages**. Il suffit de pousser le dossier `frontend` (ou le repo complet) et de configurer la `BASE_URL` de l'API.
+*   **Frontend** : Peut être hébergé sur **Vercel**, **Netlify** ou **GitHub Pages**. Il suffit de pousser le dossier `frontend` (ou le repo complet) et de configurer la variable d'environnement `VITE_API_BASE_URL` pour pointer vers votre backend déployé.
 *   **Backend** : Idéal pour des services de PaaS comme **Render**, **Railway** ou **Fly.io** qui supportent Node.js et les connexions aux bases de données managées (comme Neon.tech utilisé ici).
 *   **Database** : Déjà hébergée sur **Neon.tech**, facilitant un déploiement global sans gestion d'infra serveur.
 
