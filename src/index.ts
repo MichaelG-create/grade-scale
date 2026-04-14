@@ -34,7 +34,7 @@ server.setErrorHandler((error, request, reply) => {
     return reply.status(400).send({
       code: 'VALIDATION_ERROR',
       message: 'Données invalides',
-      details: error.errors,
+      details: error.issues,
     });
   }
 
