@@ -1,0 +1,14 @@
+node_modules
+dist
+.env
+.git
+.github
+*.log
+npm-debug.log*
+frontend
+infra
+.agents
+.gemini
+README.md
+docker-compose.yml
+Makefile
