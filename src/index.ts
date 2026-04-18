@@ -162,7 +162,14 @@ server.get('/questions', async () => {
 // Lancement du serveur
 const start = async () => {
   try {
-    await server.register(cors, { origin: true });
+    await server.register(cors, { 
+      origin: [
+        'https://grade-scale.vercel.app',
+        'http://localhost:5173',
+        'http://localhost:3000'
+      ],
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+    });
     
     const port = Number(process.env.PORT) || 3000;
     // Indispensable pour WSL : écoute sur 0.0.0.0
