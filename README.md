@@ -112,10 +112,49 @@ Après avoir cliqué sur évaluer, l'intelligence artificielle de **Groq** analy
 ## 🏗️ Architecture Infrastructure (Azure)
 
 Le dossier `infra/` contient tout le nécessaire pour déployer deux environnements isolés et scalables :
+
+### Schéma Technique
+```mermaid
+graph TD
+    subgraph "💻 ENVIRONNEMENT LOCAL"
+        LD[Local Dev Node] -->|Fastify| LDB[(Postgres Docker)]
+        LD -->|API Call| GROQ[Groq Cloud API]
+        FE_L[Vite Frontend] -->|localhost:3000| LD
+    end
+
+    subgraph "☁️ ENVIRONNEMENT AZURE"
+        direction TB
+        ACA[Azure Container App - Backend]
+        APG[(Azure Postgres Flexible)]
+        AKV[Azure Key Vault - Secrets]
+        ACA -->|Storage| APG
+        AKV -->|Injected Secrets| ACA
+        FE_V[Vercel/Azure Frontend] -->|HTTPS| ACA
+    end
+```
+
+### Flux de données (Evaluation)
+```mermaid
+sequenceDiagram
+    participant U as Utilisateur
+    participant F as Frontend (Vite)
+    participant B as Backend (Fastify)
+    participant D as Database (Prisma)
+    participant AI as Groq (Llama 3.3)
+
+    U->>F: Soumet une réponse élève
+    F->>B: POST /submissions
+    B->>D: Create Submission
+    B->>AI: Send Prompt (IA)
+    AI-->>B: Structured Response
+    B->>D: Update Evaluation
+    B-->>F: Return Summary
+```
+
 *   **Environnement Dev** : Configuration légère pour les tests rapides et la validation.
 *   **Environnement Prod** : Configuration optimisée pour la démonstration finale.
-*   **Remote State** : L'état de l'infrastructure est stocké de manière sécurisée dans un **Storage Account Azure**, permettant une gestion collaborative sans conflit.
-*   **Compute** : Utilisation d'**Azure Container Apps** (Serverless) pour minimiser les coûts tout en assurant une haute disponibilité.
+*   **Remote State** : L'état de l'infrastructure est stocké de manière sécurisée dans un **Storage Account Azure**.
+*   **Compute** : Utilisation d'**Azure Container Apps** (Serverless).
 
 ---
 
