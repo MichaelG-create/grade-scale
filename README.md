@@ -78,7 +78,16 @@ cp .env.example .env
 > * **Base de données :** Renseignez vos identifiants PostgreSQL (Neon ou autre) pour `DATABASE_URL` et `DIRECT_URL`.
 > * **IA :** Ajoutez une clé API valide pour `GROQ_API_KEY` (disponible gratuitement sur le [console Groq](https://console.groq.com/)).
 
-#### 1.4. Amorçage et Synchronisation (Database)
+#### 1.4. Optionnel : Développement Local (Docker)
+Si vous préférez travailler sans Neon en local :
+```bash
+# Lancer la base de données locale
+docker-compose up -d
+
+# Configurer le .env avec les valeurs locales (voir .env.example)
+```
+
+#### 1.5. Amorçage et Synchronisation (Database)
 ```bash
 # Synchroniser le schéma de la base de données
 npx prisma migrate dev
@@ -100,19 +109,51 @@ npm run dev
 
 ---
 ### 🎨 Frontend
-L'interface utilisateur est construite en Vanilla JS avec Vite pour une expérience ultra-rapide.
+L'interface utilisateur (Vite + Vanilla JS) permet aux enseignants de tester l'IA en conditions réelles.
+
 ```bash
-cd frontend
-npm install
-npm run dev
+# Aller dans le dossier frontend, installer et lancer
+cd frontend && npm install && npm run dev
 ```
 
-## 🌐 Déploiement & Hébergement
+---
 
+## 📖 Guide d'Utilisation de l'Interface
+
+Une fois le backend et le frontend lancés, ouvrez l'URL `http://localhost:5173`.
+
+> [!IMPORTANT]
+> **Démonstration en ligne** : Avant de commencer à tester l'évaluation des copies sur le site Vercel, **[cliquez ici pour réveiller l'API Backend](https://grade-scale.onrender.com/health)**. 
+> Comme c'est une version gratuite sur Render, le premier chargement peut prendre ~1 minute. Une fois que vous voyez `{"status":"ok"}`, vous pouvez utiliser le frontend normalement.
+
+### 1. Préparation de l'Évaluation
+*   **Sélection** : Choisissez une question dans la liste (ex: *"Le mouvement d'un palet"*).
+*   **Saisie** : Tapez la réponse d'un élève.
+*   **Astuce (Test Rapide)** : Utilisez les **Pillules d'exemples** sous le champ de saisie. Elles injectent des réponses types pour tester la réaction de l'IA (correcte, erreur d'unité, etc.).
+
+### 2. Analyse des Résultats (IA Groq)
+Après avoir cliqué sur évaluer, l'intelligence artificielle de **Groq** analyse la copie en une fraction de seconde pour afficher :
+*   **Note Finale** : Calculée dynamiquement sur le barème de la rubrique.
+*   **Feedback Global** : Un commentaire qui résume la performance.
+*   **Méconceptions Détectées** : L'IA identifie les erreurs de raisonnement types (ex: *"Confusion entre masse et poids"*).
+*   **Détail par Critère** : Décomposition du barème avec justifications et conseils de remédiation (💡).
+
+---
+
+## 🌐 Déploiement & Live Demo
+
+Le projet est accessible en ligne pour démonstration immédiate :
+*   **🚀 Interface Frontend (Vercel)** : [https://grade-scale.vercel.app/](https://grade-scale.vercel.app/)
+*   **⚙️ API Backend (Render)** : [https://grade-scale.onrender.com/](https://grade-scale.onrender.com/)
+
+> [!IMPORTANT]
+> **Note sur la disponibilité** : Le Backend est hébergé sur une instance gratuite Render. Si l'API n'a pas été sollicitée depuis plus d'une heure, l'instance s'endort. Le premier appel peut donc prendre **45 à 60 secondes** le temps que le serveur "se réveille".
+
+## 🛠️ Stack Technique & Déploiement
 Ce projet est conçu pour être facilement "Cloud-Ready" :
-*   **Frontend** : Peut être hébergé sur **Vercel**, **Netlify** ou **GitHub Pages**. Il suffit de pousser le dossier `frontend` (ou le repo complet) et de configurer la variable d'environnement `VITE_API_BASE_URL` pour pointer vers votre backend déployé.
-*   **Backend** : Idéal pour des services de PaaS comme **Render**, **Railway** ou **Fly.io** qui supportent Node.js et les connexions aux bases de données managées (comme Neon.tech utilisé ici).
-*   **Database** : Déjà hébergée sur **Neon.tech**, facilitant un déploiement global sans gestion d'infra serveur.
+*   **Frontend** : Déployé sur **Vercel**. La variable `VITE_API_BASE_URL` pointe vers l'instance Render.
+*   **Backend** : Déployé sur **Render** (Node.js). Gère l'orchestration de l'IA et la connexion sécurisée à la base de données.
+*   **Database** : Hébergée sur **Neon.tech** (PostgreSQL Serverless).
 
 ## 📈 Roadmap & Industrialisation
 
