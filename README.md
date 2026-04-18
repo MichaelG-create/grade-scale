@@ -16,7 +16,7 @@ La conception de ce PoC répond à un double objectif :
 Le système est construit sur des principes applicatifs robustes, conçus pour la maintenabilité et la sécurité :
 
 *   **Validation Gérée par le Schéma (Type Safety)** : Utilisation exclusive de **Zod** à la frontière de l'API pour parser les payload entrants et contraindre les réponses du LLM (Structured Outputs), garantissant un typage strict end-to-end.
-*   **Couche de Service Isolée (Separation of Concerns)** : La logique analytique et l'orchestration de l'IA (hydratation des barèmes, appels API) sont découplées des routeurs Fastify, facilitant les tests unitaires et l'isolation du code.
+*   **Couche de Service Isolée (Separation of Concerns)** : La logique analytique et l'orchestration de l'IA (remplissage des barèmes, appels API) sont découplées des routeurs Fastify, facilitant les tests unitaires et l'isolation du code.
 *   **Stratégie de Connection Pooling (Neon.tech)** : Pour sécuriser la scalabilité en environnement Serverless, la configuration Prisma sépare le flux opérationnel applicatif (`DATABASE_URL` adossée à PgBouncer) des exécutions de migrations de schéma (`DIRECT_URL`).
 *   **Privacy By Design (RGPD)** : Intégration d'une couche de pseudonymisation interceptant et nettoyant les données étudiantes brutes avant leur exposition systémique à un fournisseur LLM externe.
 
@@ -26,95 +26,64 @@ Le schéma relationnel modélise une évaluation formative granulée, au-delà d
 *   **Rubriques et Critères** : Structuration hiérarchique dynamique pour évaluer les compétences conceptuelles transverses (Ex: Démarche d'investigation, validation des unités).
 *   **Détection des *Misconceptions*** : Le moteur d'analyse sémantique est architecturé pour identifier les biais de raisonnement récurrents chez l'élève, facilitant la génération de feedbacks actionnables.
 
-## 🛠️ 4. Stack Technique de Référence
+## 🛠️ 4. Stack Technique & Industrialisation
 
-*   **Runtime / Language** : Node.js & TypeScript (Strict Mode)
-*   **API Framework** : Fastify (Haute performance, architecture orientée événements)
-*   **ORM Layer** : Prisma
-*   **Database** : PostgreSQL (Host: Neon.tech Serverless)
-*   **Inference Engine** : API OpenAI Compatible (Groq LPU exploité ici pour la mitigation absolue de la latence)
+Le projet est conçu avec une double approche : **Simplicité locale** et **Scalabilité industrielle**.
 
----
-
-## 🚀 Mise en Route (Development)
-### 💻 Backend
-
-#### 0. 📋 Prérequis
-Avant de commencer, assurez-vous d'avoir **Node.js** (LTS) installé. Si vous ne l'avez pas, nous recommandons l'utilisation de **NVM** (Node Version Manager).
-
-```bash
-# Installer NVM (outil recommandé pour la gestion d'installation de version de node)
-wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
-
-# Recharger la configuration du shell (Bash ou Zsh)
-source ~/.$(basename $SHELL)rc
-
-# Installer la dernière version LTS de Node.js
-nvm install --lts
-```
+*   **Logic (Local)** : Node.js, TypeScript, Fastify, Prisma, PostgreSQL.
+*   **Industrial (Cloud)** : Docker (Multi-stage), Terraform (IaC), Azure Container Apps, Vitest (QA).
+*   **Intelligence** : Inférence Groq LPU (Modèles Llama 3.3 70B) pour une latence minimale.
 
 ---
 
-#### 1. Installation du Projet
+## 🚀 Installation & Développement Local
 
-#### 1.1. Cloner le dépôt
-```bash
-git clone git@github.com:MichaelG-create/grade-scale.git
-cd grade-scale
-```
+C'est la méthode recommandée pour contribuer ou tester le moteur d'évaluation rapidement.
 
-#### 1.2. Installation des dépendances
-```bash
-npm install
-```
+### 1. Prérequis Système
+*   **Node.js (LTS)** : Recommandé via **NVM**
+    ```bash
+    wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
+    source ~/.bashrc
+    nvm install --lts
+    ```
+*   **Docker** : Installé (pour la base de données PostgreSQL locale).
 
-#### 1.3. Configuration des variables d'environnement
-```bash
-# Créer le fichier .env à partir de l'exemple
-cp .env.example .env
-```
-> [!IMPORTANT]
-> Ouvrez le fichier `.env` et remplacez les valeurs par défaut :
-> * **Base de données :** Renseignez vos identifiants PostgreSQL (Neon ou autre) pour `DATABASE_URL` et `DIRECT_URL`.
-> * **IA :** Ajoutez une clé API valide pour `GROQ_API_KEY` (disponible gratuitement sur le [console Groq](https://console.groq.com/)).
-
-#### 1.4. Optionnel : Développement Local (Docker)
-Si vous préférez travailler sans Neon en local :
-```bash
-# Lancer la base de données locale
-docker-compose up -d
-
-# Configurer le .env avec les valeurs locales (voir .env.example)
-```
-
-#### 1.5. Amorçage et Synchronisation (Database)
-```bash
-# Synchroniser le schéma de la base de données
-npx prisma migrate dev
-
-# Remplir la base avec des données de test
-npm run seed
-```
-
-#### 2. Lancement du Serveur
-```bash
-npm run dev
-```
+### 2. Configuration Rapide
+1. **Clone & Install** :
+   ```bash
+   git clone git@github.com:MichaelG-create/grade-scale.git
+   cd grade-scale
+   npm install
+   ```
+2. **Environnement** :
+   `cp .env.example .env` (Remplissez votre `GROQ_API_KEY`).
+3. **Database Locale** :
+   ```bash
+   docker-compose up -d
+   npx prisma migrate dev
+   npm run seed
+   ```
+4. **Lancement** :
+   `npm run dev` (Backend sur port 3000) et `cd frontend && npm run dev` (Frontend sur port 5173).
 
 ---
 
-### 💡 Astuces
-* **Rechargement shell :** Si la commande `nvm` n'est pas reconnue après l'étape 1, exécutez manuellement `source ~/.bashrc` (ou `.zshrc`).
-* **Prisma :** Les variables `DIRECT_URL` et `DATABASE_URL` sont toutes deux nécessaires pour fonctionner correctement avec des environnements Serverless comme Neon.
+## 🏗️ Workflow "Senior Dev" & Infrastructure Azure
 
----
-### 🎨 Frontend
-L'interface utilisateur (Vite + Vanilla JS) permet aux enseignants de tester l'IA en conditions réelles.
+Pour passer du PoC à un produit prêt pour la production, j'ai ajouté les outils suivants :
 
-```bash
-# Aller dans le dossier frontend, installer et lancer
-cd frontend && npm install && npm run dev
-```
+### 🛠️ Commandes Makefile
+Le `Makefile` centralise les commandes complexes :
+*   `make test` : Lance Vitest (Unitaires + API Integration).
+*   `make docker-build` : Crée une image de production optimisée (Multi-stage build).
+*   `make build` : Compile le TypeScript proprement.
+
+### ☁️ Infrastructure as Code (Terraform)
+Le dossier `infra/` permet de déployer une stack complète sur Azure (**France Central**) :
+*   **Azure Container Apps** : Héberge le backend dockerisé.
+*   **Azure Postgres Flexible** : Base de données managée.
+*   **Remote State** : Gestion de l'état Terraform sur Azure Storage.
 
 ---
 
@@ -140,6 +109,16 @@ Après avoir cliqué sur évaluer, l'intelligence artificielle de **Groq** analy
 
 ---
 
+## 🏗️ Architecture Infrastructure (Azure)
+
+Le dossier `infra/` contient tout le nécessaire pour déployer deux environnements isolés et scalables :
+*   **Environnement Dev** : Configuration légère pour les tests rapides et la validation.
+*   **Environnement Prod** : Configuration optimisée pour la démonstration finale.
+*   **Remote State** : L'état de l'infrastructure est stocké de manière sécurisée dans un **Storage Account Azure**, permettant une gestion collaborative sans conflit.
+*   **Compute** : Utilisation d'**Azure Container Apps** (Serverless) pour minimiser les coûts tout en assurant une haute disponibilité.
+
+---
+
 ## 🌐 Déploiement & Live Demo
 
 Le projet est accessible en ligne pour démonstration immédiate :
@@ -147,22 +126,18 @@ Le projet est accessible en ligne pour démonstration immédiate :
 *   **⚙️ API Backend (Render)** : [https://grade-scale.onrender.com/](https://grade-scale.onrender.com/)
 
 > [!IMPORTANT]
-> **Note sur la disponibilité** : Le Backend est hébergé sur une instance gratuite Render. Si l'API n'a pas été sollicitée depuis plus d'une heure, l'instance s'endort. Le premier appel peut donc prendre **45 à 60 secondes** le temps que le serveur "se réveille".
+> **Note sur la disponibilité** : Le Backend Render est en version gratuite (Cold Start ~1 min). Pour une performance et une réactivité maximale, préférez le déploiement sur **Azure Container Apps** via le code Terraform fourni.
 
-## 🛠️ Stack Technique & Déploiement
-Ce projet est conçu pour être facilement "Cloud-Ready" :
-*   **Frontend** : Déployé sur **Vercel**. La variable `VITE_API_BASE_URL` pointe vers l'instance Render.
-*   **Backend** : Déployé sur **Render** (Node.js). Gère l'orchestration de l'IA et la connexion sécurisée à la base de données.
-*   **Database** : Hébergée sur **Neon.tech** (PostgreSQL Serverless).
+---
 
-## 📈 Roadmap & Industrialisation
+## 📋 Roadmap & Industrialisation
 
-Pour élever cette fondation vers un socle de production complet, les itérations suivantes viendraient consolider l'architecture :
-
-*   **Cloud Infrastructure (Azure)** : Bascule des charges de travail applicatives et de l'orchestration asynchrone (ex: files d'attente pour le traitement de masse) sur une infrastructure de conteneurs managée de type Azure.
-*   **Pipeline Multi-Modal (OCR)** : Intégration en amont d'un service de Vision par Ordinateur pour traiter l'ingestion brute de copies physiques, automatisant le pipeline de traitement ("Paper-to-Digital").
-*   **Assistant Créateur d'Évaluations (IA)** : Module permettant de générer automatiquement des sujets complexes, leurs solutions de référence et les barèmes de critères associés à partir d'un simple thème pédagogique.
-*   **Monitoring & Observabilité** : Implémentation d'une télémétrie complète (Latence LLM requêtes/réponses, utilisation des tokens, détection d'anomalies de parsing) via un APM industriel.
+- [x] **IaC** : Automatisation complète du déploiement via Terraform sur Azure.
+- [x] **QA** : Mise en place d'une suite de tests (Unitaires & Intégration) avec Vitest.
+- [x] **Docker** : Image stable et sécurisée pour le cloud (Registry GHCR).
+- [x] **DevX** : Automatisation des tâches courantes via Makefile.
+- [ ] **Next Step** : Migration du Frontend vers Azure Static Web Apps.
+- [ ] **Next Step** : Mise en œuvre d'un pipeline CI/CD GitHub Actions complet.
 
 ---
 *Projet conçu avec rigueur par Michael GARCIA - Ingénieur & Enseignant.*
