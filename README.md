@@ -37,23 +37,68 @@ Le schéma relationnel modélise une évaluation formative granulée, au-delà d
 ---
 
 ## 🚀 Mise en Route (Development)
-
 ### 💻 Backend
+
+#### 0. 📋 Prérequis
+Avant de commencer, assurez-vous d'avoir **Node.js** (LTS) installé. Si vous ne l'avez pas, nous recommandons l'utilisation de **NVM** (Node Version Manager).
+
 ```bash
-# 1. Installation des dépendances
+# Installer NVM (outil recommandé pour la gestion d'installation de version de node)
+wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
+
+# Recharger la configuration du shell (Bash ou Zsh)
+source ~/.$(basename $SHELL)rc
+
+# Installer la dernière version LTS de Node.js
+nvm install --lts
+```
+
+---
+
+#### 1. Installation du Projet
+
+#### 1.1. Cloner le dépôt
+```bash
+git clone git@github.com:MichaelG-create/grade-scale.git
+cd grade-scale
+```
+
+#### 1.2. Installation des dépendances
+```bash
 npm install
+```
 
-# 2. Configuration Environnementale (.env)
+#### 1.3. Configuration des variables d'environnement
+```bash
+# Créer le fichier .env à partir de l'exemple
 cp .env.example .env
+```
+> [!IMPORTANT]
+> Ouvrez le fichier `.env` et remplacez les valeurs par défaut :
+> * **Base de données :** Renseignez vos identifiants PostgreSQL (Neon ou autre) pour `DATABASE_URL` et `DIRECT_URL`.
+> * **IA :** Ajoutez une clé API valide pour `GROQ_API_KEY` (disponible gratuitement sur le [console Groq](https://console.groq.com/)).
 
-# 3. Amorçage et Synchronisation (Database)
+#### 1.4. Amorçage et Synchronisation (Database)
+```bash
+# Synchroniser le schéma de la base de données
 npx prisma migrate dev
-npm run seed
 
-# 4. Exécution du Serveur
+# Remplir la base avec des données de test
+npm run seed
+```
+
+#### 2. Lancement du Serveur
+```bash
 npm run dev
 ```
 
+---
+
+### 💡 Astuces
+* **Rechargement shell :** Si la commande `nvm` n'est pas reconnue après l'étape 1, exécutez manuellement `source ~/.bashrc` (ou `.zshrc`).
+* **Prisma :** Les variables `DIRECT_URL` et `DATABASE_URL` sont toutes deux nécessaires pour fonctionner correctement avec des environnements Serverless comme Neon.
+
+---
 ### 🎨 Frontend
 L'interface utilisateur est construite en Vanilla JS avec Vite pour une expérience ultra-rapide.
 ```bash
