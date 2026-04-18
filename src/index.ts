@@ -12,7 +12,7 @@ import { z } from 'zod';
 import { AppError } from './errors/AppError';
 
 
-const server = fastify({
+export const server = fastify({
   logger: {
     transport: {
       target: 'pino-pretty',
@@ -159,27 +159,28 @@ server.get('/questions', async () => {
   });
 });
 
-// Lancement du serveur
-const start = async () => {
-  try {
-    await server.register(cors, { 
-      origin: [
-        'https://grade-scale.vercel.app',
-        'http://localhost:5173',
-        'http://localhost:3000'
-      ],
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
-    });
-    
-    const port = Number(process.env.PORT) || 3000;
-    // Indispensable pour WSL : écoute sur 0.0.0.0
-    await server.listen({ port, host: '0.0.0.0' });
-    
-    console.log(`🚀 GradeScale Server ready at http://localhost:${port}`);
-  } catch (err) {
-    server.log.error(err);
-    process.exit(1);
-  }
-};
+// Lancement du serveur (uniquement si le fichier est exécuté directement)
+if (require.main === module || !process.env.VITEST) {
+  const start = async () => {
+    try {
+      await server.register(cors, { 
+        origin: [
+          'https://grade-scale.vercel.app',
+          'http://localhost:5173',
+          'http://localhost:3000'
+        ],
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+      });
+      
+      const port = Number(process.env.PORT) || 3000;
+      await server.listen({ port, host: '0.0.0.0' });
+      
+      console.log(`🚀 GradeScale Server ready at http://localhost:${port}`);
+    } catch (err) {
+      server.log.error(err);
+      process.exit(1);
+    }
+  };
 
-start();
+  start();
+}
