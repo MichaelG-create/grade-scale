@@ -1,0 +1,39 @@
+resource "azurerm_resource_group" "dev" {
+  name     = "rg-gradescale-dev"
+  location = "France Central"
+}
+
+module "database" {
+  source              = "../../modules/postgres"
+  resource_group_name = azurerm_resource_group.dev.name
+  location            = azurerm_resource_group.dev.location
+  server_name         = "pg-gradescale-dev-${random_string.suffix.result}"
+  admin_username      = "psqladmin"
+  admin_password      = var.db_password
+  db_name             = "gradescale_dev"
+}
+
+module "environment" {
+  source              = "../../modules/aca_env"
+  resource_group_name = azurerm_resource_group.dev.name
+  location            = azurerm_resource_group.dev.location
+  env_name            = "cae-gradescale-dev"
+}
+
+module "api" {
+  source       = "../../modules/container_app"
+  rg_name      = azurerm_resource_group.dev.name
+  env_id       = module.environment.id
+  app_name     = "aca-gradescale-api-dev"
+  image_name   = "ghcr.io/${var.github_username}/grade-scale:latest"
+  cpu          = 0.25
+  memory       = "0.5Gi"
+  database_url = "postgresql://${module.database.admin_username}:${var.db_password}@${module.database.server_fqdn}:5432/${module.database.db_name}?sslmode=require"
+  groq_api_key = var.groq_api_key
+}
+
+resource "random_string" "suffix" {
+  length  = 6
+  special = false
+  upper   = false
+}
