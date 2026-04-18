@@ -330,3 +330,60 @@ footer {
 }
 
 footer strong { color: var(--text); }
+
+/* Error Banner Premium Style */
+.error-banner {
+  background: rgba(244, 63, 94, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 40px;
+  animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.error-content {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.error-icon {
+  font-size: 2rem;
+}
+
+.error-text strong {
+  display: block;
+  color: #fb7185;
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.error-text p {
+  font-size: 0.9rem;
+  color: #fda4af;
+  margin-bottom: 10px;
+}
+
+.error-link {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.error-link:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(244, 63, 94, 0.4);
+}

@@ -13,6 +13,8 @@ const newBtn = document.getElementById('new-btn');
 const exampleButtonsContainer = document.getElementById('example-buttons');
 const questionPreview = document.getElementById('question-preview');
 const questionPreviewText = document.getElementById('question-preview-text');
+const errorBanner = document.getElementById('error-banner');
+const backendLink = document.getElementById('backend-link');
 
 let allQuestions = [];
 
@@ -53,10 +55,18 @@ async function fetchQuestions() {
 
             console.log("Mapped Examples:", EXAMPLES_MAP);
             updateQuestionDisplay();
+            errorBanner.classList.add('hidden');
         }
     } catch (err) {
         console.error("Failed to fetch questions:", err);
+        showConnectionError();
     }
+}
+
+function showConnectionError() {
+    errorBanner.classList.remove('hidden');
+    // On pointe vers /health pour réveiller Render sans polluer les logs de l'index
+    backendLink.href = `${API_BASE}/health`;
 }
 
 function updateQuestionDisplay() {
@@ -134,7 +144,8 @@ submissionForm.addEventListener('submit', async (e) => {
         const { submissionId } = await response.json();
         pollResult(submissionId);
     } catch (err) {
-        alert("Erreur lors de la soumission. Vérifiez que le serveur backend est lancé.");
+        console.error("Submission error:", err);
+        showConnectionError();
         setLoading(false);
     }
 });

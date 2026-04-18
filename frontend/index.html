@@ -8,6 +8,18 @@
 </head>
 <body>
     <div class="container">
+        <!-- Error Banner (Hidden by default) -->
+        <div id="error-banner" class="error-banner hidden">
+            <div class="error-content">
+                <span class="error-icon">⚠️</span>
+                <div class="error-text">
+                    <strong>Le backend semble endormi.</strong>
+                    <p>Si c'est la première utilisation depuis une heure, Render a mis l'instance en veille.</p>
+                    <a id="backend-link" href="#" target="_blank" class="error-link">Cliquez ici pour réveiller le serveur</a>
+                </div>
+            </div>
+        </div>
+
         <header>
             <div class="brand">
                 <div class="logo">🐧 GradeScale AI</div>
