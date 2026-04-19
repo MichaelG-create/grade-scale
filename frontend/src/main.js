@@ -80,7 +80,7 @@ function checkWakeup() {
 
 function showConnectionError() {
     errorBanner.classList.remove('hidden');
-    // On pointe vers /health pour réveiller Render sans polluer les logs de l'index
+    // On pointe vers /health pour réveiller l'instance sans polluer les logs de l'index
     backendLink.href = `${API_BASE}/health`;
 }
 
