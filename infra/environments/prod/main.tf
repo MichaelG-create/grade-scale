@@ -1,13 +1,13 @@
 resource "azurerm_resource_group" "prod" {
   name     = "rg-gradescale-prod"
-  location = "France Central"
+  location = "West Europe"
 }
 
 data "azurerm_client_config" "current" {}
 
 module "security" {
   source              = "../../modules/key_vault"
-  name                = "kv-gradescale-prod-${random_string.suffix.result}"
+  name                = "kv-gscale-prod-${random_string.suffix.result}"
   resource_group_name = azurerm_resource_group.prod.name
   location            = azurerm_resource_group.prod.location
   tenant_id           = data.azurerm_client_config.current.tenant_id
