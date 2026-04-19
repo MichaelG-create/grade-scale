@@ -5,14 +5,7 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Start seeding...');
 
-  // Cleanup
-  await prisma.criterionEvaluation.deleteMany();
-  await prisma.evaluation.deleteMany();
-  await prisma.submission.deleteMany();
-  await prisma.criterion.deleteMany();
-  await prisma.rubric.deleteMany();
-  await prisma.question.deleteMany();
-  await prisma.subject.deleteMany();
+  // Cleanup removed for safe automated runs
 
   // 1. Subject
   const subject = await prisma.subject.upsert({
