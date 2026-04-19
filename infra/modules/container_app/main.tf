@@ -4,6 +4,10 @@ resource "azurerm_container_app" "main" {
   resource_group_name          = var.rg_name
   revision_mode                = "Single"
 
+  identity {
+    type = "SystemAssigned"
+  }
+
   template {
     container {
       name   = "gradescale-api"
@@ -13,17 +17,27 @@ resource "azurerm_container_app" "main" {
 
       env {
         name  = "DATABASE_URL"
-        value = var.database_url
+        secret_name = "database-url"
       }
       env {
         name  = "GROQ_API_KEY"
-        value = var.groq_api_key
+        secret_name = "groq-api-key"
       }
       env {
         name  = "PORT"
         value = "3000"
       }
     }
+  }
+
+  secret {
+    name  = "database-url"
+    value = var.database_url
+  }
+
+  secret {
+    name  = "groq-api-key"
+    value = var.groq_api_key
   }
 
   ingress {

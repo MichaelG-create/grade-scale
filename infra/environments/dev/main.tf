@@ -3,6 +3,17 @@ resource "azurerm_resource_group" "dev" {
   location = "France Central"
 }
 
+data "azurerm_client_config" "current" {}
+
+module "security" {
+  source              = "../../modules/key_vault"
+  name                = "kv-gradescale-dev-${random_string.suffix.result}"
+  resource_group_name = azurerm_resource_group.dev.name
+  location            = azurerm_resource_group.dev.location
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  admin_object_id     = data.azurerm_client_config.current.object_id
+}
+
 module "database" {
   source              = "../../modules/postgres"
   resource_group_name = azurerm_resource_group.dev.name
@@ -30,6 +41,21 @@ module "api" {
   memory       = "0.5Gi"
   database_url = "postgresql://${module.database.admin_username}:${var.db_password}@${module.database.server_fqdn}:5432/${module.database.db_name}?sslmode=require"
   groq_api_key = var.groq_api_key
+}
+
+resource "azurerm_key_vault_access_policy" "api" {
+  key_vault_id = module.security.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = module.api.principal_id
+
+  secret_permissions = ["Get", "List"]
+}
+
+module "frontend" {
+  source              = "../../modules/static_web_app"
+  name                = "stapp-gradescale-dev"
+  resource_group_name = azurerm_resource_group.dev.name
+  location            = "West Europe"
 }
 
 resource "random_string" "suffix" {
