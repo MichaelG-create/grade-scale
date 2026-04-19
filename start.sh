@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 # On s'assure que la base de données est à jour
 echo "🚀 Running database migrations..."
@@ -9,4 +10,4 @@ node dist/prisma/seed.js
 
 # On démarre l'application
 echo "🟢 Starting the application..."
-npm start
+exec npm start
