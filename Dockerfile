@@ -1,6 +1,9 @@
 # --- STAGE 1: Build ---
 FROM node:20-alpine AS build
 
+# Installation des dépendances système pour Prisma
+RUN apk add --no-cache libc6-compat openssl
+
 WORKDIR /app
 
 # Installation des dépendances
@@ -21,6 +24,9 @@ RUN npm prune --production
 
 # --- STAGE 2: Runner ---
 FROM node:20-alpine AS runner
+
+# Installation des dépendances système pour Prisma
+RUN apk add --no-cache libc6-compat openssl
 
 WORKDIR /app
 
