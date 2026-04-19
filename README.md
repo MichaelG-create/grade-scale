@@ -54,7 +54,9 @@ C'est la méthode recommandée pour contribuer ou tester le moteur d'évaluation
    ```bash
    git clone git@github.com:MichaelG-create/grade-scale.git
    cd grade-scale
-   npm install
+   npm install          # Installation du Backend
+   cd frontend && npm install  # Installation du Frontend
+   cd ..
    ```
 2. **Environnement** :
    `cp .env.example .env` (Remplissez votre `GROQ_API_KEY`).
@@ -65,13 +67,12 @@ C'est la méthode recommandée pour contribuer ou tester le moteur d'évaluation
    npm run seed
    ```
 4. **Lancement** :
-   `npm run dev` (Backend sur port 3000) et `cd frontend && npm run dev` (Frontend sur port 5173).
+   *   **Backend** : `npm run dev` (port 3000)
+   *   **Frontend** : `cd frontend && npm run dev` (port 5173)
 
 ---
 
-## 🏗️ Workflow "Senior Dev" & Infrastructure Azure
-
-Pour passer du PoC à un produit prêt pour la production, j'ai ajouté les outils suivants :
+## 🏗️ Workflow & Infrastructure
 
 ### 🛠️ Commandes Makefile
 Le `Makefile` centralise les commandes complexes :
@@ -79,11 +80,12 @@ Le `Makefile` centralise les commandes complexes :
 *   `make docker-build` : Crée une image de production optimisée (Multi-stage build).
 *   `make build` : Compile le TypeScript proprement.
 
-### ☁️ Infrastructure as Code (Terraform)
-Le dossier `infra/` permet de déployer une stack complète sur Azure (**France Central**) :
-*   **Azure Container Apps** : Héberge le backend dockerisé.
-*   **Azure Postgres Flexible** : Base de données managée.
-*   **Remote State** : Gestion de l'état Terraform sur Azure Storage.
+### ☁️ Déploiement Azure (Full Cloud)
+L'infrastructure est entièrement pilotée par le code (IaC) via **Terraform**. Elle comprend Azure Container Apps, Postgres Flexible Server, Key Vault et Static Web Apps.
+
+👉 **[Consulter le Guide de Déploiement Azure](./docs/DEPLOY_AZURE.md)**
+
+---
 
 ---
 
