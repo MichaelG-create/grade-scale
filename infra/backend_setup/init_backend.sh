@@ -24,4 +24,20 @@ echo "Storage Account Name: $STORAGE_ACCOUNT_NAME"
 echo "Resource Group Name: $RESOURCE_GROUP_NAME"
 echo "Container Name: $CONTAINER_NAME"
 echo "------------------------------------------"
-echo "SAVE THESE VALUES for your Terraform backend configuration."
+
+# Auto-update backend.tf
+BACKEND_FILE="infra/environments/dev/backend.tf"
+echo "Updating $BACKEND_FILE..."
+
+cat <<EOF > $BACKEND_FILE
+terraform {
+  backend "azurerm" {
+    resource_group_name  = "$RESOURCE_GROUP_NAME"
+    storage_account_name = "$STORAGE_ACCOUNT_NAME"
+    container_name       = "$CONTAINER_NAME"
+    key                  = "dev.terraform.tfstate"
+  }
+}
+EOF
+
+echo "Done! You can now run 'terraform init' in infra/environments/dev/"

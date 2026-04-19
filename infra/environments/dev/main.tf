@@ -14,6 +14,21 @@ module "security" {
   admin_object_id     = data.azurerm_client_config.current.object_id
 }
 
+resource "azurerm_key_vault_secret" "database_url" {
+  name         = "database-url"
+  value        = "postgresql://${module.database.admin_username}:${var.db_password}@${module.database.server_fqdn}:5432/${module.database.db_name}?sslmode=require"
+  key_vault_id = module.security.id
+  
+  # Ensure the secret is created after the DB is ready
+  depends_on = [module.database]
+}
+
+resource "azurerm_key_vault_secret" "groq_api_key" {
+  name         = "groq-api-key"
+  value        = var.groq_api_key
+  key_vault_id = module.security.id
+}
+
 module "database" {
   source              = "../../modules/postgres"
   resource_group_name = azurerm_resource_group.dev.name
@@ -32,15 +47,15 @@ module "environment" {
 }
 
 module "api" {
-  source       = "../../modules/container_app"
-  rg_name      = azurerm_resource_group.dev.name
-  env_id       = module.environment.id
-  app_name     = "aca-gradescale-api-dev"
-  image_name   = "ghcr.io/${var.github_username}/grade-scale:latest"
-  cpu          = 0.25
-  memory       = "0.5Gi"
-  database_url = "postgresql://${module.database.admin_username}:${var.db_password}@${module.database.server_fqdn}:5432/${module.database.db_name}?sslmode=require"
-  groq_api_key = var.groq_api_key
+  source                 = "../../modules/container_app"
+  rg_name                = azurerm_resource_group.dev.name
+  env_id                 = module.environment.id
+  app_name               = "aca-gradescale-api-dev"
+  image_name             = "ghcr.io/${var.github_username}/grade-scale:latest"
+  cpu                    = 0.25
+  memory                 = "0.5Gi"
+  database_url_secret_id = azurerm_key_vault_secret.database_url.versionless_id
+  groq_api_key_secret_id = azurerm_key_vault_secret.groq_api_key.versionless_id
 }
 
 resource "azurerm_key_vault_access_policy" "api" {

@@ -31,13 +31,15 @@ resource "azurerm_container_app" "main" {
   }
 
   secret {
-    name  = "database-url"
-    value = var.database_url
+    name                = "database-url"
+    key_vault_secret_id = var.database_url_secret_id
+    identity            = "System"
   }
 
   secret {
-    name  = "groq-api-key"
-    value = var.groq_api_key
+    name                = "groq-api-key"
+    key_vault_secret_id = var.groq_api_key_secret_id
+    identity            = "System"
   }
 
   ingress {
