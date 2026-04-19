@@ -9,6 +9,92 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model Subject {
+  id        String     @id @default(uuid())
+  name      String
+  code      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  questions Question[]
+}
+
+model Question {
+  id          String       @id @default(uuid())
+  title       String
+  content     String
+  subjectId   String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  solution    String?
+  subject     Subject      @relation(fields: [subjectId], references: [id])
+  rubrics     Rubric[]
+  submissions Submission[]
+}
+
+model Rubric {
+  id         String      @id @default(uuid())
+  title      String
+  questionId String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  criteria   Criterion[]
+  question   Question    @relation(fields: [questionId], references: [id])
+}
+
+model Criterion {
+  id          String                @id @default(uuid())
+  name        String
+  description String?
+  maxScore    Float
+  step        Float                 @default(0.25)
+  rubricId    String
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  rubric      Rubric                @relation(fields: [rubricId], references: [id])
+  evaluations CriterionEvaluation[]
+}
+
+model Submission {
+  id              String               @id @default(uuid())
+  studentPseudoId String
+  content         String?
+  questionId      String
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  imageUrl        String?
+  sourceType      SubmissionSourceType @default(TEXT)
+  evaluation      Evaluation?
+  question        Question             @relation(fields: [questionId], references: [id])
+}
+
+model Evaluation {
+  id                  String                @id @default(uuid())
+  status              EvaluationStatus      @default(PENDING)
+  submissionId        String                @unique
+  totalScore          Float?
+  generalFeedback     String?
+  misconceptions      String?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  criteriaEvaluations CriterionEvaluation[]
+  submission          Submission            @relation(fields: [submissionId], references: [id])
+}
+
+model CriterionEvaluation {
+  id             String     @id @default(uuid())
+  evaluationId   String
+  criterionId    String
+  score          Float
+  feedback       String?
+  misconceptions String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  criterion      Criterion  @relation(fields: [criterionId], references: [id])
+  evaluation     Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+
+  @@unique([evaluationId, criterionId])
+}
+
 enum EvaluationStatus {
   PENDING
   PROCESSING
@@ -16,109 +102,7 @@ enum EvaluationStatus {
   FAILED
 }
 
-model Subject {
-  id          String     @id @default(uuid())
-  name        String     // ex: "Physique-Chimie"
-  code        String     @unique // ex: "SPC"
-  
-  questions   Question[]
-
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-}
-
-model Question {
-  id          String       @id @default(uuid())
-  title       String
-  content     String       @db.Text
-  solution    String?      @db.Text // Référentiel de correction pour l'IA
-  
-  subjectId   String
-  subject     Subject      @relation(fields: [subjectId], references: [id])
-  
-  rubrics     Rubric[]
-  submissions Submission[]
-
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-}
-
-model Rubric {
-  id          String      @id @default(uuid())
-  title       String      // ex: "Barème Devoir DM1 Mécanique"
-  
-  questionId  String
-  question    Question    @relation(fields: [questionId], references: [id])
-  
-  criteria    Criterion[]
-
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-}
-
-model Criterion {
-  id          String      @id @default(uuid())
-  name        String      // ex: "Utilisation de la formule P=mg"
-  description String?     @db.Text
-  maxScore    Float       // Points maximum alloués à ce critère
-  step        Float       @default(0.25) // Ta demande : granulation (0.25, 0.5, etc.)
-  
-  rubricId    String
-  rubric      Rubric      @relation(fields: [rubricId], references: [id])
-  
-  evaluations CriterionEvaluation[]
-
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-}
-
-model Submission {
-  id              String      @id @default(uuid())
-  // RGPD: Uniquement un UUID ou Hash, aucune donnée nominative.
-  studentPseudoId String      
-  content         String      @db.Text // Le contenu OCR de la copie
-  
-  questionId      String
-  question        Question    @relation(fields: [questionId], references: [id])
-  
-  evaluation      Evaluation?
-
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-}
-
-model Evaluation {
-  id              String           @id @default(uuid())
-  status          EvaluationStatus @default(PENDING)
-  
-  submissionId    String           @unique
-  submission      Submission       @relation(fields: [submissionId], references: [id])
-  
-  totalScore      Float?           // null tant que status != COMPLETED
-  generalFeedback String?          @db.Text // Feedback pédagogique global
-  misconceptions  String?          @db.Text // Pièges et erreurs de raisonnement généraux
-  
-  criteriaEvaluations CriterionEvaluation[]
-
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-}
-
-model CriterionEvaluation {
-  id              String      @id @default(uuid())
-  
-  evaluationId    String
-  evaluation      Evaluation  @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
-  
-  criterionId     String
-  criterion       Criterion   @relation(fields: [criterionId], references: [id])
-  
-  score           Float
-  feedback        String?     @db.Text // Feedback détaillé pour ce critère précis
-  misconceptions  String?     @db.Text // Erreur locale (ex: "A confondu masse et poids")
-  
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
-  @@unique([evaluationId, criterionId]) // Un seul score par critère par évaluation
+enum SubmissionSourceType {
+  TEXT
+  IMAGE
 }
