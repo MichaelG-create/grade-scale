@@ -69,7 +69,7 @@ export class EvaluationService {
               ${criteriaString}
               
               CONTENU COPIE ÉLÈVE :
-              ${pseudonymizeContent(submission.content)}
+              ${pseudonymizeContent(submission.content ?? '')}
             `;
 
       if (this.verbose) {
