@@ -15,6 +15,7 @@ const questionPreview = document.getElementById('question-preview');
 const questionPreviewText = document.getElementById('question-preview-text');
 const errorBanner = document.getElementById('error-banner');
 const backendLink = document.getElementById('backend-link');
+const wakeupContainer = document.getElementById('wakeup-container');
 
 let allQuestions = [];
 
@@ -56,11 +57,25 @@ async function fetchQuestions() {
             console.log("Mapped Examples:", EXAMPLES_MAP);
             updateQuestionDisplay();
             errorBanner.classList.add('hidden');
+            wakeupContainer.classList.add('hidden'); // On cache le message de réveil une fois chargé
         }
     } catch (err) {
         console.error("Failed to fetch questions:", err);
         showConnectionError();
+    } finally {
+        // Au cas où le message de réveil tournait encore
+        if (allQuestions.length > 0) wakeupContainer.classList.add('hidden');
     }
+}
+
+// Détection du réveil
+function checkWakeup() {
+    // Si après 2 secondes on n'a toujours rien chargé, on affiche le message de réveil
+    setTimeout(() => {
+        if (allQuestions.length === 0) {
+            wakeupContainer.classList.remove('hidden');
+        }
+    }, 2000);
 }
 
 function showConnectionError() {
@@ -119,6 +134,7 @@ questionSelect.onchange = updateQuestionDisplay;
 
 // Start app
 fetchQuestions();
+checkWakeup();
 
 // Handle Form Submission
 submissionForm.addEventListener('submit', async (e) => {
