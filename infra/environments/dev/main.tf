@@ -29,6 +29,12 @@ resource "azurerm_key_vault_secret" "groq_api_key" {
   key_vault_id = module.security.id
 }
 
+resource "azurerm_key_vault_secret" "github_pat" {
+  name         = "github-pat"
+  value        = var.github_pat
+  key_vault_id = module.security.id
+}
+
 module "database" {
   source              = "../../modules/postgres"
   resource_group_name = azurerm_resource_group.dev.name
@@ -54,6 +60,8 @@ module "api" {
   image_name             = "ghcr.io/${var.github_username}/grade-scale:latest"
   cpu                    = 0.25
   memory                 = "0.5Gi"
+  github_username        = var.github_username
+  github_pat_secret_id   = azurerm_key_vault_secret.github_pat.versionless_id
   database_url_secret_id = azurerm_key_vault_secret.database_url.versionless_id
   groq_api_key_secret_id = azurerm_key_vault_secret.groq_api_key.versionless_id
 }

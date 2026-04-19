@@ -17,7 +17,7 @@ Le système est construit sur des principes applicatifs robustes, conçus pour l
 
 *   **Validation Gérée par le Schéma (Type Safety)** : Utilisation exclusive de **Zod** à la frontière de l'API pour parser les payload entrants et contraindre les réponses du LLM (Structured Outputs), garantissant un typage strict end-to-end.
 *   **Couche de Service Isolée (Separation of Concerns)** : La logique analytique et l'orchestration de l'IA (remplissage des barèmes, appels API) sont découplées des routeurs Fastify, facilitant les tests unitaires et l'isolation du code.
-*   **Stratégie de Connection Pooling (Neon.tech)** : Pour sécuriser la scalabilité en environnement Serverless, la configuration Prisma sépare le flux opérationnel applicatif (`DATABASE_URL` adossée à PgBouncer) des exécutions de migrations de schéma (`DIRECT_URL`).
+*   **Infrastructure Managée (Azure PostgreSQL)** : Migration d'une architecture Neon vers un environnement Azure PostgreSQL Flexible Server, assurant une isolation complète des données et une gestion robuste des backups.
 *   **Privacy By Design (RGPD)** : Intégration d'une couche de pseudonymisation interceptant et nettoyant les données étudiantes brutes avant leur exposition systémique à un fournisseur LLM externe.
 
 ## 🔭 3. Modélisation Pédagogique (Core Domain)
@@ -177,7 +177,7 @@ Le projet est accessible en ligne pour démonstration immédiate :
 - [x] **QA** : Mise en place d'une suite de tests (Unitaires & Intégration) avec Vitest.
 - [x] **Docker** : Image stable et sécurisée pour le cloud (Registry GHCR).
 - [x] **DevX** : Automatisation des tâches courantes via Makefile.
-- [ ] **Next Step** : Migration du Frontend vers Azure Static Web Apps.
+- [x] **Next Step** : Migration du Frontend vers Azure Static Web Apps.
 - [ ] **Next Step** : Mise en œuvre d'un pipeline CI/CD GitHub Actions complet.
 
 ---

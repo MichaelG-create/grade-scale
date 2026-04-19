@@ -59,7 +59,7 @@ Le backend est hébergé sur **Azure Container Apps**. L'image doit être pouss�
 
 Tous les secrets sont centralisés dans **Azure Key Vault**.
 *   Le Backend utilise une **Identité Managée** pour y accéder sans mot de passe.
-*   Assurez-vous d'injecter votre `GROQ_API_KEY` dans le Vault via le portail Azure ou la CLI après le déploiement.
+*   **Automatisation** : Votre `GROQ_API_KEY` et la `DATABASE_URL` sont injectées automatiquement dans le Vault par Terraform lors du `make infra-apply`. Aucune manipulation manuelle n'est nécessaire.
 
 ## 📊 Monitoring
 

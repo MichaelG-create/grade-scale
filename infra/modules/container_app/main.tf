@@ -42,6 +42,18 @@ resource "azurerm_container_app" "main" {
     identity            = "System"
   }
 
+  secret {
+    name                = "github-pat"
+    key_vault_secret_id = var.github_pat_secret_id
+    identity            = "System"
+  }
+
+  registry {
+    server               = "ghcr.io"
+    username             = var.github_username
+    password_secret_name = "github-pat"
+  }
+
   ingress {
     external_enabled = true
     target_port      = 3000

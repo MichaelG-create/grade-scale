@@ -16,3 +16,9 @@ variable "database_url_secret_id" {
 variable "groq_api_key_secret_id" {
   type      = string
 }
+variable "github_username" {
+  type      = string
+}
+variable "github_pat_secret_id" {
+  type      = string
+}

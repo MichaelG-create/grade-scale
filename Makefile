@@ -24,7 +24,11 @@ seed:
 	npm run seed
 
 docker-build:
-	docker build -t gradescale-backend .
+	docker build -t grade-scale .
+
+docker-push:
+	docker tag grade-scale:latest ghcr.io/$(GH_USER)/grade-scale:latest
+	docker push ghcr.io/$(GH_USER)/grade-scale:latest
 
 clean:
 	rm -rf dist
@@ -35,10 +39,11 @@ clean:
 # Extract variables from .env and inject them as TF_VARs
 GROQ_KEY = $(shell grep GROQ_API_KEY .env | cut -d '=' -f2- | tr -d '\" ' )
 GH_USER  = $(shell grep GITHUB_USERNAME .env | cut -d '=' -f2- | tr -d '\" ' )
+GH_PAT   = $(shell grep GITHUB_PAT .env | cut -d '=' -f2- | tr -d '\" ' )
 DB_PASS  = $(shell grep AZURE_DB_PASSWORD .env | cut -d '=' -f2- | tr -d '\" ' )
 
 # Common TF_VARs to avoid repetition
-TF_VARS = TF_VAR_groq_api_key="$(GROQ_KEY)" TF_VAR_github_username="$(GH_USER)" TF_VAR_db_password="$(DB_PASS)"
+TF_VARS = TF_VAR_groq_api_key="$(GROQ_KEY)" TF_VAR_github_username="$(GH_USER)" TF_VAR_github_pat="$(GH_PAT)" TF_VAR_db_password="$(DB_PASS)"
 
 infra-init:
 	@cd infra/environments/dev && terraform init

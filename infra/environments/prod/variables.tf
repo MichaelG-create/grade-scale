@@ -11,3 +11,8 @@ variable "groq_api_key" {
 variable "github_username" {
   type = string
 }
+
+variable "github_pat" {
+  type      = string
+  sensitive = true
+}
