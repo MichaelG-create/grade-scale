@@ -78,3 +78,23 @@
  
  > [!TIP]
  > En production, privilégiez l'utilisation de GitHub Actions pour automatiser ces étapes (CI/CD).
+
+## 🔄 Phase 4 : CI/CD (GitHub Actions)
+ 
+ Le projet inclut un workflow d'intégration et de déploiement continu automatique.
+ 
+ ### 1. Configuration des Secrets GitHub
+ Dans votre repo GitHub (Settings > Secrets > Actions), ajoutez les secrets suivants :
+ 
+ *   `AZURE_CREDENTIALS` : Le JSON généré par la commande suivante :
+     ```bash
+     az ad sp create-for-rbac --name "GradeScale-CI" --role contributor --scopes /subscriptions/$(az account show --query id -o tsv) --sdk-auth
+     ```
+ *   `AZURE_SWA_TOKEN` : Le token récupéré via `make front-push-dev`.
+ *   `GROQ_API_KEY` : Votre clé d'API Groq.
+ 
+ ### 2. Utilisation
+ À chaque `git push` sur la branche `master`, GitHub va automatiquement :
+ 1. Builder et pousser l'image Docker sur GHCR.
+ 2. Déclencher un rollout sur Azure Container Apps.
+ 3. Compiler et déployer le Frontend sur Azure Static Web Apps.
