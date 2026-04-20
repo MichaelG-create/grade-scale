@@ -80,21 +80,35 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Rollout Azure Container App
+        id: rollout
         run: |
-          az containerapp update \
+          # On récupère l'URL de la future révision
+          URL=$(az containerapp update \
             --name aca-gradescale-api-dev \
             --resource-group rg-gradescale-dev \
             --image ghcr.io/${{ env.REPO_OWNER }}/grade-scale:latest \
             --revision-suffix rev${{ github.run_number }} \
-            --no-wait
+            --no-wait \
+            --query "properties.latestRevisionFqdn" -o tsv)
+          
+          echo "NEW_REVISION_URL=https://$URL" >> $GITHUB_ENV
 
-      - name: Smoke Test (Wake up API)
+      - name: Targeted Smoke Test
         run: |
-          echo "Réveil de l'API et vérification du déploiement..."
-          URL="https://aca-gradescale-api-dev.ashymoss-ad8860a4.francecentral.azurecontainerapps.io/health"
-          # On tente de joindre l'API pendant 2 minutes max
-          #timeout 120s bash -c "until curl -sSf $URL; do sleep 5; done"
-          curl -sSf $URL
+          echo "Attente du provisioning et réveil de la révision..."
+          
+          # 1. On définit l'URL (récupérée à l'étape précédente)
+          # 2. On tente un curl toutes les 5 secondes
+          # 3. 'timeout 300s' laisse 5 minutes max (généreux pour un premier Pull d'image)
+          
+          timeout 300s bash -c '
+            until curl -sSf ${{ env.NEW_REVISION_URL }}/health; do
+              echo "Révision en cours de démarrage... (Retry dans 5s)"
+              sleep 5
+            done
+          '
+          
+          echo "✅ La nouvelle révision est UP et répond sur son URL dédiée !"
 
   deploy-frontend:
     runs-on: ubuntu-latest
