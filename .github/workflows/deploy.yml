@@ -86,7 +86,15 @@ jobs:
             --resource-group rg-gradescale-dev \
             --image ghcr.io/${{ env.REPO_OWNER }}/grade-scale:latest \
             --revision-suffix rev${{ github.run_number }} \
-            --debug
+            --no-wait
+
+      - name: Smoke Test (Wake up API)
+        run: |
+          echo "Réveil de l'API et vérification du déploiement..."
+          URL="https://aca-gradescale-api-dev.ashymoss-ad8860a4.francecentral.azurecontainerapps.io/health"
+          # On tente de joindre l'API pendant 2 minutes max
+          #timeout 120s bash -c "until curl -sSf $URL; do sleep 5; done"
+          curl -sSf $URL
 
   deploy-frontend:
     runs-on: ubuntu-latest
