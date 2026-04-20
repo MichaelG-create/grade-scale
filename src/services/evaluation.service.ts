@@ -138,18 +138,26 @@ export class EvaluationService {
         return updatedEval;
       });
 
-    } catch (error) {
-      this.logger.error(`[EvaluationService] ❌ Error evaluating ${submissionId}:`, error);
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Unknown error';
+      const errorStatus = error?.status || error?.response?.status;
+      const errorData = error?.response?.data || error?.data;
+
+      this.logger.error({
+        msg: `[EvaluationService] ❌ Error evaluating ${submissionId}`,
+        error: errorMessage,
+        status: errorStatus,
+        details: errorData,
+        stack: error.stack
+      });
       
       await prisma.evaluation.update({
         where: { id: evaluation.id },
         data: { status: EvaluationStatus.FAILED }
       });
-
-      if (error instanceof Error) {
-        if (error.name === 'ZodError') {
-          throw new OpenAIError(`AI response validation failed: ${error.message}`);
-        }
+ 
+      if (error.name === 'ZodError') {
+        throw new OpenAIError(`AI response validation failed: ${error.message}`);
       }
       throw error;
     }
