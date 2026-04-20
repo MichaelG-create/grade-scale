@@ -1,6 +1,6 @@
 # --- Application Management ---
 
-.PHONY: dev build test docker-build docker-push api-push api-rollout-dev api-rollout-prod clean help
+.PHONY: dev build test docker-build docker-push api-push api-rollout-dev api-rollout-prod clean nuke infra-destroy-dev infra-destroy-prod help
 
 help:
 	@echo "GradeScale Management Commands:"
@@ -11,6 +11,7 @@ help:
 	@echo "  make api-rollout-prod  - Force update of the Prod container on Azure"
 	@echo "  make infra-apply-dev   - Apply Terraform changes to Dev"
 	@echo "  make infra-apply-prod  - Apply Terraform changes to Prod"
+	@echo "  make nuke              - DESTROY EVERYTHING (Infra + Local artifacts)"
 
 dev:
 	npm run dev
@@ -38,7 +39,10 @@ api-rollout-prod:
 	az containerapp update --name aca-gradescale-api-prod --resource-group rg-gradescale-prod --image ghcr.io/$(GH_USER)/grade-scale:latest --revision-suffix rev$$(date +%s)
 
 clean:
-	rm -rf dist node_modules frontend/dist
+	@echo "🧹 Cleaning local artifacts..."
+	rm -rf dist node_modules frontend/dist .terraform
+	find . -name ".terraform" -type d -exec rm -rf {} +
+	find . -name "terraform.tfstate*" -delete
 
 # --- Infrastructure (Terraform) ---
 
@@ -90,6 +94,17 @@ infra-init-prod:
 infra-apply-prod:
 	@echo "Applying Prod Infrastructure..."
 	@cd infra/environments/prod && $(TF_VARS) terraform apply -auto-approve
+
+infra-destroy-dev:
+	@echo "🔥 Destroying Dev Infrastructure..."
+	@cd infra/environments/dev && $(TF_VARS) terraform destroy -auto-approve
+
+infra-destroy-prod:
+	@echo "🔥 Destroying Prod Infrastructure..."
+	@cd infra/environments/prod && $(TF_VARS) terraform destroy -auto-approve
+
+nuke: infra-destroy-dev infra-destroy-prod clean
+	@echo "☢️  ALL SYSTEMS DESTROYED. Ready for fresh install."
 
 # --- FRONTEND DEPLOYMENT ---
 front-push-dev:
