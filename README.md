@@ -31,7 +31,8 @@ Le schéma relationnel modélise une évaluation formative granulée, au-delà d
 Le projet est conçu avec une double approche : **Simplicité locale** et **Scalabilité industrielle**.
 
 *   **Logic (Local)** : Node.js, TypeScript, Fastify, Prisma, PostgreSQL.
-*   **Industrial (Cloud)** : Docker (Multi-stage), Terraform (IaC), Azure Container Apps, Vitest (QA).
+*   **Industrial (Cloud)** : Docker (Multi-stage), Terraform (IaC), Azure Container Apps, Azure Static Web Apps, Vitest (QA).
+*   **Automation (CI/CD)** : GitHub Actions (Pipeline complet de test et déploiement).
 *   **Intelligence** : Inférence Groq LPU (Modèles Llama 3.3 70B) pour une latence minimale.
 
 ---
@@ -74,18 +75,25 @@ C'est la méthode recommandée pour contribuer ou tester le moteur d'évaluation
 
 ## 🏗️ Workflow & Infrastructure
 
-### 🛠️ Commandes Makefile
-Le `Makefile` centralise les commandes complexes :
+### 🛠️ Commandes Makefile (Industrial Automation)
+Le `Makefile` centralise les commandes complexes pour la gestion du cycle de vie :
 *   `make test` : Lance Vitest (Unitaires + API Integration).
-*   `make docker-build` : Crée une image de production optimisée (Multi-stage build).
-*   `make build` : Compile le TypeScript proprement.
+*   `make api-push` : Construit et pousse l'image Docker sur le registre **GHCR**.
+*   `make db-migrate-dev` : Applique les migrations Prisma sur la base **Azure PostgreSQL**.
+*   `make infra-apply-dev` : Déploie l'infrastructure complète via **Terraform**.
+*   `make nuke` : **Destruction complète** de l'infrastructure et nettoyage des artefacts locaux (pour une réinstallation propre).
+
+### 🤖 CI/CD : GitHub Actions
+Le pipeline `.github/workflows/deploy.yml` automatise la chaîne de valeur :
+1.  **Validation** : Tests unitaires (Vitest) backend et frontend + Build check.
+2.  **Containerisation** : Build de l'image Docker multi-stage et push sur GHCR.
+3.  **Deploy Backend** : Mise à jour de l'**Azure Container App** avec Smoke Testing ciblé sur la nouvelle révision.
+4.  **Deploy Frontend** : Déploiement atomique sur **Azure Static Web Apps**.
 
 ### ☁️ Déploiement Azure (Full Cloud)
 L'infrastructure est entièrement pilotée par le code (IaC) via **Terraform**. Elle comprend Azure Container Apps, Postgres Flexible Server, Key Vault et Static Web Apps.
 
 👉 **[Consulter le Guide de Déploiement Azure](./docs/DEPLOY_AZURE.md)**
-
----
 
 ---
 
@@ -124,14 +132,14 @@ graph TD
         FE_L[Vite Frontend] -->|localhost:3000| LD
     end
 
-    subgraph "☁️ ENVIRONNEMENT AZURE"
+    subgraph "☁️ ENVIRONNEMENT AZURE (CI/CD Managed)"
         direction TB
         ACA[Azure Container App - Backend]
         APG[(Azure Postgres Flexible)]
         AKV[Azure Key Vault - Secrets]
         ACA -->|Storage| APG
         AKV -->|Injected Secrets| ACA
-        FE_V[Vercel/Azure Frontend] -->|HTTPS| ACA
+        FE_A[Azure Static Web App] -->|HTTPS| ACA
     end
 ```
 
@@ -162,12 +170,12 @@ sequenceDiagram
 
 ## 🌐 Déploiement & Live Demo
 
-Le projet est accessible en ligne pour démonstration immédiate :
-*   **🚀 Interface Frontend (Vercel)** : [https://grade-scale.vercel.app/](https://grade-scale.vercel.app/)
-*   **⚙️ API Backend (Render)** : [https://grade-scale.onrender.com/](https://grade-scale.onrender.com/)
+Le projet est désormais industrialisé sur Azure :
+*   **🚀 Interface Frontend** : Déployée sur **Azure Static Web Apps**.
+*   **⚙️ API Backend** : Hébergée sur **Azure Container Apps**.
 
-> [!IMPORTANT]
-> **Note sur la disponibilité** : Le Backend Render est en version gratuite (Cold Start ~1 min). Pour une performance et une réactivité maximale, préférez le déploiement sur **Azure Container Apps** via le code Terraform fourni.
+> [!NOTE]
+> Les déploiements sont entièrement automatisés. Chaque `push` sur la branche `master` déclenche une mise à jour transparente de l'application après validation des tests.
 
 ---
 
@@ -177,8 +185,10 @@ Le projet est accessible en ligne pour démonstration immédiate :
 - [x] **QA** : Mise en place d'une suite de tests (Unitaires & Intégration) avec Vitest.
 - [x] **Docker** : Image stable et sécurisée pour le cloud (Registry GHCR).
 - [x] **DevX** : Automatisation des tâches courantes via Makefile.
-- [x] **Next Step** : Migration du Frontend vers Azure Static Web Apps.
-- [ ] **Next Step** : Mise en œuvre d'un pipeline CI/CD GitHub Actions complet.
+- [x] **Cloud Migration** : Passage de Render (backend)/ Neon (db) / Vercel (frontend) vers une stack 100% Azure.
+- [x] **CI/CD** : Pipeline GitHub Actions complet (Build, Test, Deploy, Smoke Test).
+- [ ] **Observabilité** : Intégration de dashboards Azure Monitor pour le suivi des performances IA.
+- [ ] **Pédagogie** : Support des réponses sous forme d'images (OCR + Vision API).
 
 ---
 *Projet conçu avec rigueur par Michael GARCIA - Ingénieur & Enseignant.*
