@@ -164,11 +164,7 @@ if (require.main === module || !process.env.VITEST) {
   const start = async () => {
     try {
       await server.register(cors, { 
-        origin: [
-          'https://grade-scale.vercel.app',
-          'http://localhost:5173',
-          'http://localhost:3000'
-        ],
+        origin: true, 
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
       });
       

@@ -16,3 +16,8 @@ variable "github_pat" {
   type      = string
   sensitive = true
 }
+
+variable "groq_base_url" {
+  type    = string
+  default = "https://api.groq.com/openai/v1"
+}

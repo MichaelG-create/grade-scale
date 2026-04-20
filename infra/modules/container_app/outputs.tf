@@ -1,5 +1,5 @@
 output "url" {
-  value = azurerm_container_app.main.latest_revision_fqdn
+  value = azurerm_container_app.main.ingress[0].fqdn
 }
 
 output "principal_id" {

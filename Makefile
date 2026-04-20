@@ -32,10 +32,10 @@ docker-push:
 api-push: docker-build docker-push
 
 api-rollout-dev:
-	az containerapp update --name aca-gradescale-api-dev --resource-group rg-gradescale-dev --image ghcr.io/$(GH_USER)/grade-scale:latest
+	az containerapp update --name aca-gradescale-api-dev --resource-group rg-gradescale-dev --image ghcr.io/$(GH_USER)/grade-scale:latest --revision-suffix rev$$(date +%s)
 
 api-rollout-prod:
-	az containerapp update --name aca-gradescale-api-prod --resource-group rg-gradescale-prod --image ghcr.io/$(GH_USER)/grade-scale:latest
+	az containerapp update --name aca-gradescale-api-prod --resource-group rg-gradescale-prod --image ghcr.io/$(GH_USER)/grade-scale:latest --revision-suffix rev$$(date +%s)
 
 clean:
 	rm -rf dist node_modules frontend/dist
@@ -47,6 +47,33 @@ GROQ_KEY = $(shell grep GROQ_API_KEY .env | cut -d '=' -f2- | tr -d '\" ' )
 GH_USER  = $(shell grep GITHUB_USERNAME .env | cut -d '=' -f2- | tr -d '\" ' )
 GH_PAT   = $(shell grep GITHUB_PAT .env | cut -d '=' -f2- | tr -d '\" ' )
 DB_PASS  = $(shell grep AZURE_DB_PASSWORD .env | cut -d '=' -f2- | tr -d '\" ' )
+
+# --- Database Management (Azure Dev) ---
+AZ_DB_HOST = pg-gradescale-dev-tim3ir.postgres.database.azure.com
+AZ_DB_USER = psqladmin
+AZ_DB_NAME = gradescale_dev
+AZ_DB_URL  = 'postgresql://$(AZ_DB_USER):$(DB_PASS)@$(AZ_DB_HOST):5432/$(AZ_DB_NAME)?sslmode=require'
+
+db-migrate-dev:
+	@echo "🚀 Migrating Azure Dev Database..."
+	DATABASE_URL=$(AZ_DB_URL) DIRECT_URL=$(AZ_DB_URL) npx prisma migrate deploy
+
+db-push-dev:
+	@echo "📤 Pushing schema to Azure Dev Database..."
+	DATABASE_URL=$(AZ_DB_URL) npx prisma db push
+
+db-seed-dev:
+	@echo "🌱 Seeding Azure Dev Database..."
+	DATABASE_URL=$(AZ_DB_URL) npx prisma db seed
+
+db-reset-dev:
+	@echo "⚠️  WARNING: Resetting Azure Dev database..."
+	DATABASE_URL=$(AZ_DB_URL) npx prisma db execute --stdin <<EOF
+	TRUNCATE TABLE "CriterionEvaluation", "Evaluation", "Submission", "Criterion", "Rubric", "Question", "Subject" CASCADE;
+	EOF
+	DATABASE_URL=$(AZ_DB_URL) npx prisma db seed
+
+# --- Terraform ---
 
 TF_VARS = TF_VAR_groq_api_key="$(GROQ_KEY)" TF_VAR_github_username="$(GH_USER)" TF_VAR_github_pat="$(GH_PAT)" TF_VAR_db_password="$(DB_PASS)"
 

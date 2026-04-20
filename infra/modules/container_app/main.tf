@@ -24,6 +24,10 @@ resource "azurerm_container_app" "main" {
         secret_name = "groq-api-key"
       }
       env {
+        name  = "GROQ_BASE_URL"
+        value = var.groq_base_url
+      }
+      env {
         name  = "PORT"
         value = "3000"
       }

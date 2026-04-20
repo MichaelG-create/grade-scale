@@ -22,3 +22,8 @@ variable "github_username" {
 variable "github_pat_secret_id" {
   type      = string
 }
+
+variable "groq_base_url" {
+  type    = string
+  default = "https://api.groq.com/openai/v1"
+}

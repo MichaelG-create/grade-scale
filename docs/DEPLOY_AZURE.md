@@ -36,21 +36,29 @@ make infra-apply
 > [!NOTE]
 > La commande `make infra-plan` extrait automatiquement votre `GROQ_API_KEY` du fichier `.env` à la racine pour l'injecter dans Azure Key Vault via Terraform. Zéro duplication, zéro erreur.
 
-## 📦 Phase 2 : Publication du Backend (Docker)
-
-Le backend est hébergé sur **Azure Container Apps**. L'image doit être poussée sur le registre GitHub (GHCR).
-
-1. **Générer l'image** :
-   ```bash
-   make docker-build
-   ```
-2. **Tag & Push** :
-   ```bash
-   docker tag grade-scale:latest ghcr.io/<votre-user>/grade-scale:latest
-   docker push ghcr.io/<votre-user>/grade-scale:latest
-   ```
-
-## 🌐 Phase 3 : Déploiement du Frontend (Static Web Apps)
+## 📦 Phase 2 : Publication & Déploiement du Backend
+ 
+ Le backend est hébergé sur **Azure Container Apps**. L'automatisation est gérée par le `Makefile`.
+ 
+ 1. **Build & Push l'image** (vers GHCR) :
+    ```bash
+    make api-push
+    ```
+ 2. **Déclencher le déploiement sur Azure** :
+    ```bash
+    make api-rollout-dev
+    ```
+ 
+ > [!IMPORTANT]
+ > Au démarrage du container, le système exécute automatiquement les migrations Prisma et le **seeding** de la base de données (exercices par défaut).
+ 
+ ## 🌐 Phase 3 : Déploiement du Frontend (Static Web Apps)
+ 
+ 1. Le Frontend est configuré pour pointer vers l'URL de votre API Azure (gérée dans `index.ts` via CORS).
+ 2. Pour déployer une nouvelle version du front :
+    ```bash
+    # (Commande SWA à venir ou via le portail Azure)
+    ```
 
 1. Récupérez le token de déploiement via Terraform ou le portail Azure.
 2. Utilisez l'extension **Azure Static Web Apps** dans VS Code ou la CLI `swa` pour pousser votre dossier `frontend/dist`.
