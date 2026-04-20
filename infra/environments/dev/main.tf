@@ -86,3 +86,12 @@ resource "random_string" "suffix" {
   special = false
   upper   = false
 }
+
+output "frontend_url" {
+  value = module.frontend.default_host_name
+}
+
+output "frontend_deployment_token" {
+  value     = module.frontend.api_key
+  sensitive = true
+}
