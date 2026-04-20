@@ -55,12 +55,13 @@
  ## 🌐 Phase 3 : Déploiement du Frontend (Static Web Apps)
  
  1. Le Frontend est configuré pour communiquer avec votre API Azure (CORS activé sur ACA).
- 2. Récupérez le token de déploiement via Terraform :
+ 2. Pour déployer le front automatiquement :
     ```bash
-    # Depuis le dossier infra/environments/dev
-    terraform output -raw frontend_deployment_token
+    make front-push-dev
     ```
- 3. Utilisez la CLI `swa` ou l'extension VS Code pour pousser votre dossier `frontend/dist` en utilisant ce token.
+ 
+ > [!NOTE]
+ > Cette commande automatise la récupération du token Terraform, le build (`npm run build`) et le déploiement via la CLI Azure SWA.
  
  ## 🔐 Sécurité & Secrets (Key Vault)
  

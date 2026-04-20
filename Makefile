@@ -90,3 +90,11 @@ infra-init-prod:
 infra-apply-prod:
 	@echo "Applying Prod Infrastructure..."
 	@cd infra/environments/prod && $(TF_VARS) terraform apply -auto-approve
+
+# --- FRONTEND DEPLOYMENT ---
+front-push-dev:
+	@echo "🏗️ Building Frontend..."
+	cd frontend && npm install && npm run build
+	@echo "🚀 Deploying to Azure Static Web App..."
+	@TOKEN=$$(cd infra/environments/dev && terraform output -raw frontend_deployment_token); \
+	cd frontend && npx @azure/static-web-apps-cli deploy ./dist --api-token $$TOKEN --env production
