@@ -52,7 +52,7 @@ C'est la méthode recommandée pour contribuer ou tester le moteur d'évaluation
 ### 2. Configuration Rapide
 1. **Clone & Install** :
    ```bash
-   git clone git@github.com:MichaelG-create/grade-scale.git
+   git clone https://github.com/MichaelG-create/grade-scale.git
    cd grade-scale
    npm install          # Installation du Backend
    cd frontend && npm install  # Installation du Frontend
