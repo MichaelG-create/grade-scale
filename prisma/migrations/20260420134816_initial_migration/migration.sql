@@ -1,6 +1,9 @@
 -- CreateEnum
 CREATE TYPE "EvaluationStatus" AS ENUM ('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED');
 
+-- CreateEnum
+CREATE TYPE "SubmissionSourceType" AS ENUM ('TEXT', 'IMAGE');
+
 -- CreateTable
 CREATE TABLE "Subject" (
     "id" TEXT NOT NULL,
@@ -20,6 +23,7 @@ CREATE TABLE "Question" (
     "subjectId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "solution" TEXT,
 
     CONSTRAINT "Question_pkey" PRIMARY KEY ("id")
 );
@@ -53,10 +57,12 @@ CREATE TABLE "Criterion" (
 CREATE TABLE "Submission" (
     "id" TEXT NOT NULL,
     "studentPseudoId" TEXT NOT NULL,
-    "content" TEXT NOT NULL,
+    "content" TEXT,
     "questionId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "imageUrl" TEXT,
+    "sourceType" "SubmissionSourceType" NOT NULL DEFAULT 'TEXT',
 
     CONSTRAINT "Submission_pkey" PRIMARY KEY ("id")
 );
@@ -114,7 +120,7 @@ ALTER TABLE "Submission" ADD CONSTRAINT "Submission_questionId_fkey" FOREIGN KEY
 ALTER TABLE "Evaluation" ADD CONSTRAINT "Evaluation_submissionId_fkey" FOREIGN KEY ("submissionId") REFERENCES "Submission"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CriterionEvaluation" ADD CONSTRAINT "CriterionEvaluation_evaluationId_fkey" FOREIGN KEY ("evaluationId") REFERENCES "Evaluation"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "CriterionEvaluation" ADD CONSTRAINT "CriterionEvaluation_criterionId_fkey" FOREIGN KEY ("criterionId") REFERENCES "Criterion"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CriterionEvaluation" ADD CONSTRAINT "CriterionEvaluation_criterionId_fkey" FOREIGN KEY ("criterionId") REFERENCES "Criterion"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "CriterionEvaluation" ADD CONSTRAINT "CriterionEvaluation_evaluationId_fkey" FOREIGN KEY ("evaluationId") REFERENCES "Evaluation"("id") ON DELETE CASCADE ON UPDATE CASCADE;
