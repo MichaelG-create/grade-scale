@@ -85,7 +85,8 @@ jobs:
             --name aca-gradescale-api-dev \
             --resource-group rg-gradescale-dev \
             --image ghcr.io/${{ env.REPO_OWNER }}/grade-scale:latest \
-            --revision-suffix rev${{ github.run_number }}
+            --revision-suffix rev${{ github.run_number }} \
+            --debug
 
   deploy-frontend:
     runs-on: ubuntu-latest
